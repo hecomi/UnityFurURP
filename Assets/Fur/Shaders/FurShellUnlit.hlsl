@@ -1,13 +1,9 @@
-#ifndef FUR_HLSL
-#define FUR_HLSL
+#ifndef FUR_SHELL_UNLIT_HLSL
+#define FUR_SHELL_UNLIT_HLSL
 
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/Shaders/UnlitInput.hlsl"
+#include "./FurShellParam.hlsl"
 #include "./FurCommon.hlsl"
-
-float3 _LightDirection;
-float _ShadowExtraBias;
 
 struct Attributes
 {
@@ -30,28 +26,6 @@ Attributes vert(Attributes input)
     return input;
 }
 
-inline float3 CustomApplyShadowBias(float3 positionWS, float3 normalWS)
-{
-    positionWS += _LightDirection * (_ShadowBias.x + _ShadowExtraBias);
-    float invNdotL = 1.0 - saturate(dot(_LightDirection, normalWS));
-    float scale = invNdotL * _ShadowBias.y;
-    positionWS += normalWS * scale.xxx;
-
-    return positionWS;
-}
-
-inline float4 GetShadowPositionHClip(float3 positionWS, float3 normalWS)
-{
-    positionWS = CustomApplyShadowBias(positionWS, normalWS);
-    float4 positionCS = TransformWorldToHClip(positionWS);
-#if UNITY_REVERSED_Z
-    positionCS.z = min(positionCS.z, positionCS.w * UNITY_NEAR_CLIP_VALUE);
-#else
-    positionCS.z = max(positionCS.z, positionCS.w * UNITY_NEAR_CLIP_VALUE);
-#endif
-    return positionCS;
-}
-
 void AppendShellVertex(inout TriangleStream<Varyings> stream, Attributes input, int index)
 {
     Varyings output = (Varyings)0;
@@ -67,11 +41,17 @@ void AppendShellVertex(inout TriangleStream<Varyings> stream, Attributes input, 
 
     float3 shellDir = normalize(normalInput.normalWS + move + windMove);
     float3 posWS = vertexInput.positionWS + shellDir * (_ShellStep * index);
-    //float4 posCS = TransformWorldToHClip(posWS);
-    float4 posCS = GetShadowPositionHClip(posWS, normalInput.normalWS);
+    float4 posCS = TransformWorldToHClip(posWS);
+
+    if (index > 0)
+    {
+        float3 viewDirOS = GetViewDirectionOS(posOS);
+        float eyeDotN = dot(viewDirOS, input.normalOS);
+        if (abs(eyeDotN) < _FaceViewProdThresh) return;
+    }
     
     output.vertex = posCS;
-    output.uv = TRANSFORM_TEX(input.uv, _FurMap);
+    output.uv = TRANSFORM_TEX(input.uv, _BaseMap);
     output.fogCoord = ComputeFogFactor(posCS.z);
     output.layer = (float)index / _ShellAmount;
 
@@ -91,16 +71,18 @@ void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
     }
 }
 
-void frag(
-    Varyings input, 
-    out float4 outColor : SV_Target, 
-    out float outDepth : SV_Depth)
+float4 frag(Varyings input) : SV_Target
 {
     float4 furColor = SAMPLE_TEXTURE2D(_FurMap, sampler_FurMap, input.uv * _FurScale);
     float alpha = furColor.r * (1.0 - input.layer);
     if (input.layer > 0.0 && alpha < _AlphaCutout) discard;
 
-    outColor = outDepth = input.vertex.z / input.vertex.w;
+    float4 baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv);
+    float occlusion = lerp(1.0 - _Occlusion, 1.0, input.layer);
+    float3 color = baseColor.xyz * occlusion;
+    color = MixFog(color, input.fogCoord);
+
+    return float4(color, alpha);
 }
 
 #endif

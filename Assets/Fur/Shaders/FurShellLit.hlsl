@@ -1,10 +1,10 @@
-#ifndef FUR_LIT_HLSL
-#define FUR_LIT_HLSL
+#ifndef FUR_SHELL_LIT_HLSL
+#define FUR_SHELL_LIT_HLSL
 
 #include "Packages/com.unity.render-pipelines.universal/Shaders/LitInput.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-#include "./FurCommon.hlsl"
+#include "./FurShellParam.hlsl"
 
 struct Attributes
 {

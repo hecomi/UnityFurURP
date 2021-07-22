@@ -1,7 +1,9 @@
-#ifndef FUR_UNLIT_HLSL
-#define FUR_UNLIT_HLSL
+#ifndef FUR_SHELL_SHADOW_HLSL
+#define FUR_SHELL_SHADOW_HLSL
 
-#include "Packages/com.unity.render-pipelines.universal/Shaders/UnlitInput.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
+#include "./FurShellParam.hlsl"
 #include "./FurCommon.hlsl"
 
 struct Attributes
@@ -40,10 +42,11 @@ void AppendShellVertex(inout TriangleStream<Varyings> stream, Attributes input, 
 
     float3 shellDir = normalize(normalInput.normalWS + move + windMove);
     float3 posWS = vertexInput.positionWS + shellDir * (_ShellStep * index);
-    float4 posCS = TransformWorldToHClip(posWS);
+    //float4 posCS = TransformWorldToHClip(posWS);
+    float4 posCS = GetShadowPositionHClip(posWS, normalInput.normalWS);
     
     output.vertex = posCS;
-    output.uv = TRANSFORM_TEX(input.uv, _BaseMap);
+    output.uv = TRANSFORM_TEX(input.uv, _FurMap);
     output.fogCoord = ComputeFogFactor(posCS.z);
     output.layer = (float)index / _ShellAmount;
 
@@ -63,18 +66,16 @@ void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
     }
 }
 
-float4 frag(Varyings input) : SV_Target
+void frag(
+    Varyings input, 
+    out float4 outColor : SV_Target, 
+    out float outDepth : SV_Depth)
 {
     float4 furColor = SAMPLE_TEXTURE2D(_FurMap, sampler_FurMap, input.uv * _FurScale);
     float alpha = furColor.r * (1.0 - input.layer);
     if (input.layer > 0.0 && alpha < _AlphaCutout) discard;
 
-    float4 baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv);
-    float occlusion = lerp(1.0 - _Occlusion, 1.0, input.layer);
-    float3 color = baseColor.xyz * occlusion;
-    color = MixFog(color, input.fogCoord);
-
-    return float4(color, alpha);
+    outColor = outDepth = input.vertex.z / input.vertex.w;
 }
 
 #endif

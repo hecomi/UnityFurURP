@@ -1,4 +1,4 @@
-Shader "Unlit/Fur"
+Shader "Fur/Shell/Unlit"
 {
 
 Properties
@@ -13,6 +13,7 @@ Properties
     _BaseMove("Base Move", Vector) = (0.0, -0.0, 0.0, 3.0)
     _WindFreq("Wind Freq", Vector) = (0.5, 0.7, 0.9, 1.0)
     _WindMove("Wind Move", Vector) = (0.2, 0.3, 0.2, 1.0)
+    _FaceViewProdThresh("Direction Threshold", Range(0.0, 1.0)) = 0.0
 }
 
 SubShader
@@ -32,14 +33,15 @@ SubShader
     Pass
     {
         Name "Unlit"
+
         HLSLPROGRAM
         #pragma exclude_renderers gles gles3 glcore
         #pragma multi_compile_fog
-        #include "./FurUnlit.hlsl"
         #pragma vertex vert
         #pragma require geometry
         #pragma geometry geom 
         #pragma fragment frag
+        #include "./FurShellUnlit.hlsl"
         ENDHLSL
     }
 
@@ -53,11 +55,11 @@ SubShader
 
         HLSLPROGRAM
         #pragma exclude_renderers gles gles3 glcore
-        #include "./FurDepth.hlsl"
         #pragma vertex vert
         #pragma require geometry
         #pragma geometry geom 
         #pragma fragment frag
+        #include "./FurShellDepth.hlsl"
         ENDHLSL
     }
 
@@ -72,11 +74,11 @@ SubShader
 
         HLSLPROGRAM
         #pragma exclude_renderers gles gles3 glcore
-        #include "./FurShadow.hlsl"
         #pragma vertex vert
         #pragma require geometry
         #pragma geometry geom 
         #pragma fragment frag
+        #include "./FurShellShadow.hlsl"
         ENDHLSL
     }
 }

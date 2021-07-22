@@ -1,8 +1,8 @@
-#ifndef FUR_DEPTH_HLSL
-#define FUR_DEPTH_HLSL
+#ifndef FUR_SHELL_DEPTH_HLSL
+#define FUR_SHELL_DEPTH_HLSL
 
 #include "Packages/com.unity.render-pipelines.universal/Shaders/UnlitInput.hlsl"
-#include "./FurCommon.hlsl"
+#include "./FurShellParam.hlsl"
 
 struct Attributes
 {
