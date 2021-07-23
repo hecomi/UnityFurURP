@@ -24,28 +24,38 @@ Material:
         m_Scale: {x: 10, y: 10}
         m_Offset: {x: 0, y: 0}
     - _FurMap:
-        m_Texture: {fileID: 2800000, guid: a4c3b3bd8d6f3ce46b9352f7f3d78caa, type: 3}
+        m_Texture: {fileID: 2800000, guid: 06a14a1f370dddc4d852be45219dc8fc, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 2800000, guid: e0a62416f4c506d4798f004b12d84fc3, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _AlphaCutout: 0.1
     - _AppendMoreFins: 0
-    - _Density: 2.49
+    - _Density: 2
     - _DrawOrigPolygon: 1
+    - _FaceNormalFactor: 0.113
     - _FaceViewProdThresh: 1
-    - _FinJointNum: 10
-    - _FinLength: 0.402
-    - _Metallic: 0.5
-    - _Occlusion: 0.7
-    - _RandomDirection: 1
-    - _ShadowExtraBias: 0
-    - _Smoothness: 0.5
-    - _TessFactor: 6
+    - _FinJointNum: 3
+    - _FinLength: 0.2
+    - _Metallic: 0
+    - _NormalFactor: 0.196
+    - _NormalScale: 0.671
+    - _Occlusion: 0.977
+    - _RandomDirection: 0.71
+    - _RimLightIntensity: 0.871
+    - _RimLightPower: 4
+    - _ShadowExtraBias: -0.3
+    - _Smoothness: 0.383
+    - _TessFactor: 5
     - _TessMaxDist: 5
     - _TessMinDist: 1
     m_Colors:
+    - _AmbientColor: {r: 0.12941179, g: 0.21490265, b: 0.32156864, a: 1}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _BaseMove: {r: 0, g: -0.4, b: 0, a: 3}
-    - _WindFreq: {r: 0.2, g: 0.4, b: 0.3, a: 1}
-    - _WindMove: {r: 0.4, g: 0.1, b: 0.2, a: 0.2}
+    - _WindFreq: {r: 1, g: 0.4, b: 0.2, a: 1}
+    - _WindMove: {r: 0.5, g: 0.3, b: 0.2, a: 2}
   m_BuildTextureStacks: []

@@ -12,7 +12,7 @@ Properties
 
     [Header(Fur)][Space]
     _FurMap("Fur", 2D) = "white" {}
-    _NormalMap("Normal", 2D) = "bump" {}
+    [Normal] _NormalMap("Normal", 2D) = "bump" {}
     _NormalScale("Normal Scale", Range(0.0, 2.0)) = 1.0
     [IntRange] _ShellAmount("Shell Amount", Range(1, 14)) = 14
     _ShellStep("Shell Step", Range(0.0, 0.01)) = 0.001

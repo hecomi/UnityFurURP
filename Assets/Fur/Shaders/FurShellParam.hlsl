@@ -9,8 +9,6 @@ float _FurScale;
 float4 _BaseMove;
 float4 _WindFreq;
 float4 _WindMove;
-float _RimLightPower;
-float _RimLightIntensity;
 float3 _AmbientColor;
 float _FaceViewProdThresh;
 

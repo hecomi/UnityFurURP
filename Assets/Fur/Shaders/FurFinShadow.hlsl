@@ -1,5 +1,5 @@
-#ifndef FUR_FIN_UNLIT_HLSL
-#define FUR_FIN_UNLIT_HLSL
+#ifndef FUR_FIN_SHADOW_HLSL
+#define FUR_FIN_SHADOW_HLSL
 
 #include "Packages/com.unity.render-pipelines.universal/Shaders/UnlitInput.hlsl"
 #include "./FurFinParam.hlsl"

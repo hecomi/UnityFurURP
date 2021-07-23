@@ -3,8 +3,8 @@
 
 #include "Packages/com.unity.render-pipelines.universal/Shaders/LitInput.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #include "./FurShellParam.hlsl"
+#include "./FurCommon.hlsl"
 
 struct Attributes
 {
@@ -81,39 +81,6 @@ void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
 inline float3 TransformHClipToWorld(float4 positionCS)
 {
     return mul(UNITY_MATRIX_I_VP, positionCS).xyz;
-}
-
-void ApplyRimLight(inout float3 color, float3 posWS, float3 viewDirWS, float3 normalWS)
-{
-    float viewDotNormal = abs(dot(viewDirWS, normalWS));
-    float normalFactor = pow(abs(1.0 - viewDotNormal), _RimLightPower);
-
-    Light light = GetMainLight();
-    float lightDirDotView = dot(light.direction, viewDirWS);
-    float intensity = pow(max(-lightDirDotView, 0.0), _RimLightPower);
-    intensity *= _RimLightIntensity * normalFactor;
-#ifdef _MAIN_LIGHT_SHADOWS
-    float4 shadowCoord = TransformWorldToShadowCoord(posWS);
-    intensity *= MainLightRealtimeShadow(shadowCoord);
-#endif 
-    color += intensity * light.color;
-
-#ifdef _ADDITIONAL_LIGHTS
-    int additionalLightsCount = GetAdditionalLightsCount();
-    for (int i = 0; i < additionalLightsCount; ++i)
-    {
-        int index = GetPerObjectLightIndex(i);
-        Light light = GetAdditionalPerObjectLight(index, posWS);
-        float lightDirDotView = dot(light.direction, viewDirWS);
-        float intensity = max(-lightDirDotView, 0.0);
-        intensity *= _RimLightIntensity * normalFactor;
-        intensity *= light.distanceAttenuation;
-#ifdef _MAIN_LIGHT_SHADOWS
-        intensity *= AdditionalLightRealtimeShadow(index, posWS);
-#endif 
-        color += intensity * light.color;
-    }
-#endif
 }
 
 float4 frag(Varyings input) : SV_Target
