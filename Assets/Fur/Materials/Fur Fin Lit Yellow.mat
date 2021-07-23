@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Fur Fin Lit Yellow
+  m_Shader: {fileID: 4800000, guid: 9f6e9468949ea454eb72b4edd48e6e3b, type: 3}
+  m_ShaderKeywords: DRAW_ORIG_POLYGON
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BaseMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 10, y: 10}
+        m_Offset: {x: 0, y: 0}
+    - _FurMap:
+        m_Texture: {fileID: 2800000, guid: 06a14a1f370dddc4d852be45219dc8fc, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 2800000, guid: e0a62416f4c506d4798f004b12d84fc3, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _AlphaCutout: 0.1
+    - _AppendMoreFins: 0
+    - _Density: 3
+    - _DrawOrigPolygon: 1
+    - _FaceNormalFactor: 0.13
+    - _FaceViewProdThresh: 1
+    - _FinJointNum: 3
+    - _FinLength: 0.2
+    - _Metallic: 0
+    - _NormalFactor: 0.196
+    - _NormalScale: 0.6
+    - _Occlusion: 0.862
+    - _RandomDirection: 0.767
+    - _RimLightIntensity: 0.871
+    - _RimLightPower: 4
+    - _ShadowExtraBias: -0.3
+    - _Smoothness: 0.4
+    - _TessFactor: 5
+    - _TessMaxDist: 5
+    - _TessMinDist: 1
+    m_Colors:
+    - _AmbientColor: {r: 0.037320513, g: 0.09325546, b: 0.16037738, a: 1}
+    - _BaseColor: {r: 0.8773585, g: 0.65695924, b: 0.3034887, a: 1}
+    - _BaseMove: {r: 0, g: -0.4, b: 0, a: 3}
+    - _WindFreq: {r: 1, g: 0.4, b: 0.2, a: 1}
+    - _WindMove: {r: 0.5, g: 0.3, b: 0.2, a: 2}
+  m_BuildTextureStacks: []

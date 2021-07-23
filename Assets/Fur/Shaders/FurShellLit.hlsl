@@ -90,14 +90,14 @@ float4 frag(Varyings input) : SV_Target
     float alpha = furColor.r * (1.0 - input.layer);
     if (input.layer > 0.0 && alpha < _AlphaCutout) discard;
 
-    float3 viewDirWS = SafeNormalize(GetCameraPositionWS() - input.positionWS);;
+    float3 viewDirWS = SafeNormalize(GetCameraPositionWS() - input.positionWS);
     float3 normalTS = UnpackNormalScale(
         SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, furUv), 
         _NormalScale);
-    float3 bitangent = SafeNormalize(viewDirWS.y * cross(input.normalWS.xyz, input.tangentWS.xyz));
-    float3 normalWS = TransformTangentToWorld(
+    float3 bitangent = SafeNormalize(viewDirWS.y * cross(input.normalWS, input.tangentWS));
+    float3 normalWS = SafeNormalize(TransformTangentToWorld(
         normalTS, 
-        float3x3(input.tangentWS.xyz, bitangent.xyz, input.normalWS.xyz));
+        float3x3(input.tangentWS, bitangent, input.normalWS)));
 
     SurfaceData surfaceData = (SurfaceData)0;
     InitializeStandardLitSurfaceData(input.uv, surfaceData);
@@ -115,11 +115,11 @@ float4 frag(Varyings input) : SV_Target
 #endif
     inputData.fogCoord = input.fogFactorAndVertexLight.x;
     inputData.vertexLighting = input.fogFactorAndVertexLight.yzw;
-    inputData.bakedGI = SAMPLE_GI(input.lightmapUV, input.vertexSH, inputData.normalWS);
+    inputData.bakedGI = SAMPLE_GI(input.lightmapUV, input.vertexSH, normalWS);
 
     float4 color = UniversalFragmentPBR(inputData, surfaceData);
 
-    ApplyRimLight(color.rgb, input.positionWS, viewDirWS, input.normalWS);
+    ApplyRimLight(color.rgb, input.positionWS, viewDirWS, normalWS);
     color.rgb += _AmbientColor;
     color.rgb = MixFog(color.rgb, inputData.fogCoord);
 

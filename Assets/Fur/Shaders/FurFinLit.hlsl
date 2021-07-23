@@ -35,6 +35,7 @@ Attributes vert(Attributes input)
 void AppendFinVertex(
     inout TriangleStream<Varyings> stream, 
     float2 uv, 
+    float2 lightmapUV, 
     float3 posOS, 
     float3 normalOS, 
     float2 finUv,
@@ -54,7 +55,7 @@ void AppendFinVertex(
     float fogFactor = ComputeFogFactor(output.positionCS.z);
     output.fogFactorAndVertexLight = half4(fogFactor, vertexLight);
 
-    OUTPUT_LIGHTMAP_UV(input.lightmapUV, unity_LightmapST, output.lightmapUV);
+    OUTPUT_LIGHTMAP_UV(lightmapUV, unity_LightmapST, output.lightmapUV);
     OUTPUT_SH(output.normalWS, output.vertexSH);
 
     stream.Append(output);
@@ -75,6 +76,8 @@ void AppendFinVertices(
 
     float2 uv0 = TRANSFORM_TEX(input0.texcoord, _BaseMap);
     float2 uv12 = (TRANSFORM_TEX(input1.texcoord, _BaseMap) + TRANSFORM_TEX(input2.texcoord, _BaseMap)) / 2;
+    float2 lightmapUV0 = input0.lightmapUV;
+    float2 lightmapUV12 = (input1.lightmapUV + input2.lightmapUV) / 2;
     float uvOffset = length(uv0);
     float uvXScale = length(uv0 - uv12) * _Density;
 
@@ -113,15 +116,15 @@ void AppendFinVertices(
             {
                 
                 float3 finNormalOS = normalize(lerp(normalOS0, faceNormalOS, _FaceNormalFactor));
-                AppendFinVertex(stream, uv0, posBeginOS, finNormalOS, float2(uvX1, finFactor), finSideDirWS);
-                AppendFinVertex(stream, uv12, posEndOS, finNormalOS, float2(uvX2, finFactor), finSideDirWS);
+                AppendFinVertex(stream, uv0, lightmapUV0, posBeginOS, finNormalOS, float2(uvX1, finFactor), finSideDirWS);
+                AppendFinVertex(stream, uv12, lightmapUV12, posEndOS, finNormalOS, float2(uvX2, finFactor), finSideDirWS);
             }
             else
             {
                 faceNormalOS *= -1.0;
                 float3 finNormalOS = normalize(lerp(normalOS0, faceNormalOS, _FaceNormalFactor));
-                AppendFinVertex(stream, uv12, posEndOS, finNormalOS, float2(uvX2, finFactor), finSideDirWS);
-                AppendFinVertex(stream, uv0, posBeginOS, finNormalOS, float2(uvX1, finFactor), finSideDirWS);
+                AppendFinVertex(stream, uv12, lightmapUV12, posEndOS, finNormalOS, float2(uvX2, finFactor), finSideDirWS);
+                AppendFinVertex(stream, uv0, lightmapUV0, posBeginOS, finNormalOS, float2(uvX1, finFactor), finSideDirWS);
             }
         }
 

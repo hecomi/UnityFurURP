@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Fur Fin Lit
+  m_Name: Fur Fin Lit Grid
   m_Shader: {fileID: 4800000, guid: 9f6e9468949ea454eb72b4edd48e6e3b, type: 3}
   m_ShaderKeywords: DRAW_ORIG_POLYGON
   m_LightmapFlags: 4
@@ -21,7 +21,7 @@ Material:
     m_TexEnvs:
     - _BaseMap:
         m_Texture: {fileID: 10309, guid: 0000000000000000f000000000000000, type: 0}
-        m_Scale: {x: 10, y: 10}
+        m_Scale: {x: 5, y: 5}
         m_Offset: {x: 0, y: 0}
     - _FurMap:
         m_Texture: {fileID: 2800000, guid: 06a14a1f370dddc4d852be45219dc8fc, type: 3}
@@ -32,28 +32,28 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _AlphaCutout: 0.1
+    - _AlphaCutout: 0.072
     - _AppendMoreFins: 0
-    - _Density: 2
+    - _Density: 7.55
     - _DrawOrigPolygon: 1
-    - _FaceNormalFactor: 0.113
+    - _FaceNormalFactor: 0.082
     - _FaceViewProdThresh: 1
     - _FinJointNum: 3
-    - _FinLength: 0.2
-    - _Metallic: 0
+    - _FinLength: 0.22
+    - _Metallic: 0.861
     - _NormalFactor: 0.196
     - _NormalScale: 0.671
-    - _Occlusion: 0.977
-    - _RandomDirection: 0.71
+    - _Occlusion: 0.455
+    - _RandomDirection: 0.442
     - _RimLightIntensity: 0.871
     - _RimLightPower: 4
     - _ShadowExtraBias: -0.3
-    - _Smoothness: 0.383
-    - _TessFactor: 5
+    - _Smoothness: 0.59
+    - _TessFactor: 4.41
     - _TessMaxDist: 5
     - _TessMinDist: 1
     m_Colors:
-    - _AmbientColor: {r: 0.12941179, g: 0.21490265, b: 0.32156864, a: 1}
+    - _AmbientColor: {r: 0.01848225, g: 0.039958913, b: 0.066037714, a: 1}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _BaseMove: {r: 0, g: -0.4, b: 0, a: 3}
     - _WindFreq: {r: 1, g: 0.4, b: 0.2, a: 1}
