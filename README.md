@@ -5,7 +5,8 @@ Unity Fur URP
 
 This is an example of a fur shader implementation in Universal Render Pipleine. It includes the following features:
 
-- 1 Pass using a geometry shader
+- Shell / Fin
+- 1 Pass using a geometry shader (and tessellation for Fin)
 - Lit / Unlit
 - Lighting calculation using a normal map
 - Rim lighting
@@ -14,6 +15,7 @@ This is an example of a fur shader implementation in Universal Render Pipleine. 
 Screenshots
 ------------
 <img src="https://raw.githubusercontent.com/wiki/hecomi/UnityFurURP/Screenshot.gif" width="720" /><br />
+<img src="https://raw.githubusercontent.com/wiki/hecomi/UnityFurURP/Screenshot2.gif" width="720" /><br />
 
 
 License
