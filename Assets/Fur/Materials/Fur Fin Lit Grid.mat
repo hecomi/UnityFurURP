@@ -36,19 +36,19 @@ Material:
     - _AppendMoreFins: 0
     - _Density: 7.55
     - _DrawOrigPolygon: 1
-    - _FaceNormalFactor: 0.082
+    - _FaceNormalFactor: 0.28
     - _FaceViewProdThresh: 1
     - _FinJointNum: 3
     - _FinLength: 0.22
-    - _Metallic: 0.861
+    - _Metallic: 0.917
     - _NormalFactor: 0.196
-    - _NormalScale: 0.671
+    - _NormalScale: 1.056
     - _Occlusion: 0.455
     - _RandomDirection: 0.442
     - _RimLightIntensity: 0.871
     - _RimLightPower: 4
     - _ShadowExtraBias: -0.3
-    - _Smoothness: 0.59
+    - _Smoothness: 0.569
     - _TessFactor: 4.41
     - _TessMaxDist: 5
     - _TessMinDist: 1
