@@ -4,7 +4,7 @@ Unity Fur URP
 
 This is an example of a fur shader implementation in Universal Render Pipleine. It includes the following features:
 
-- Shell / Fin
+- 3 methods (Shell / Fin / Fur Polygon)
 - 1 Pass using a geometry shader (and tessellation for Fin)
 - Lit / Unlit
 - Lighting calculation using a normal map
@@ -13,21 +13,32 @@ This is an example of a fur shader implementation in Universal Render Pipleine. 
 
 Screenshots
 ------------
-<img src="https://raw.githubusercontent.com/wiki/hecomi/UnityFurURP/Screenshot.gif" width="720" /><br />
-<img src="https://raw.githubusercontent.com/wiki/hecomi/UnityFurURP/Screenshot2.gif" width="720" /><br />
+### Shell
+<img src="https://raw.githubusercontent.com/wiki/hecomi/UnityFurURP/Screenshot.gif" width="720" />
 
+### Fin
+<img src="https://raw.githubusercontent.com/wiki/hecomi/UnityFurURP/Screenshot2.gif" width="720" />
+
+### Fur Polygon
+<img src="https://raw.githubusercontent.com/wiki/hecomi/UnityFurURP/Screenshot3.gif" width="720" />
+
+### Compare
+<img src="https://raw.githubusercontent.com/wiki/hecomi/UnityFurURP/Compare.gif" width="720" />
 
 Demo
 ----
-- https://www.youtube.com/watch?v=Hab3dcumtXU
+- Comparing Shell and Fin
+   - https://www.youtube.com/watch?v=Hab3dcumtXU
 
 
-Article
--------
+Articles
+--------
 - Shell
     - https://tips.hecomi.com/entry/2021/06/27/185835
 - Fin
     - https://tips.hecomi.com/entry/2021/07/24/121420
+- Fur Polygon
+    - https://tips.hecomi.com/entry/2021/08/12/155948
 
 
 License
