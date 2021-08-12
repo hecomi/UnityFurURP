@@ -2,7 +2,7 @@
 #define FUR_SHELL_DEPTH_HLSL
 
 #include "Packages/com.unity.render-pipelines.universal/Shaders/UnlitInput.hlsl"
-#include "./FurShellParam.hlsl"
+#include "./Param.hlsl"
 
 struct Attributes
 {

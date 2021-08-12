@@ -32,23 +32,23 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _AlphaCutout: 0.062
+    - _AlphaCutout: 0.01
     - _AppendMoreFins: 0
-    - _Density: 1.17
+    - _Density: 2
     - _DrawOrigPolygon: 1
-    - _FaceNormalFactor: 0.113
+    - _FaceNormalFactor: 0.069
     - _FaceViewProdThresh: 1
-    - _FinJointNum: 6
-    - _FinLength: 0.446
+    - _FinJointNum: 2
+    - _FinLength: 0.3
     - _Metallic: 0
     - _NormalFactor: 0.196
-    - _NormalScale: 0.757
+    - _NormalScale: 0.489
     - _Occlusion: 1
-    - _RandomDirection: 0.404
-    - _RimLightIntensity: 0.871
-    - _RimLightPower: 4
-    - _ShadowExtraBias: -0.233
-    - _Smoothness: 0.637
+    - _RandomDirection: 1
+    - _RimLightIntensity: 0.305
+    - _RimLightPower: 8.64
+    - _ShadowExtraBias: 0
+    - _Smoothness: 0
     - _TessFactor: 10
     - _TessMaxDist: 50
     - _TessMinDist: 10
@@ -57,5 +57,5 @@ Material:
     - _BaseColor: {r: 0.31509617, g: 0.5377358, b: 0.21644709, a: 1}
     - _BaseMove: {r: 0, g: -0.4, b: 0, a: 3}
     - _WindFreq: {r: 1, g: 0.4, b: 0.2, a: 1}
-    - _WindMove: {r: 0.5, g: 0.3, b: 0.2, a: 2}
+    - _WindMove: {r: 0.5, g: 0, b: 0.3, a: 2}
   m_BuildTextureStacks: []

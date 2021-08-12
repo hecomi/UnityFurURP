@@ -2,8 +2,8 @@
 #define FUR_SHELL_UNLIT_HLSL
 
 #include "Packages/com.unity.render-pipelines.universal/Shaders/UnlitInput.hlsl"
-#include "./FurShellParam.hlsl"
-#include "./FurCommon.hlsl"
+#include "./Param.hlsl"
+#include "../Common/Common.hlsl"
 
 struct Attributes
 {

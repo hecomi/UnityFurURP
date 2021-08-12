@@ -1,9 +1,9 @@
-#ifndef FUR_FIN_UNLIT_HLSL
-#define FUR_FIN_UNLIT_HLSL
+#ifndef FUR_FIN_SHADOW_HLSL
+#define FUR_FIN_SHADOW_HLSL
 
 #include "Packages/com.unity.render-pipelines.universal/Shaders/UnlitInput.hlsl"
-#include "./FurFinParam.hlsl"
-#include "./FurCommon.hlsl"
+#include "./Param.hlsl"
+#include "../Common/Common.hlsl"
 
 struct Attributes
 {
@@ -29,11 +29,17 @@ void AppendFinVertex(
     inout TriangleStream<Varyings> stream, 
     float2 uv, 
     float3 posOS, 
+    float3 normalWS,
     float2 finUv)
 {
     Varyings output;
 
+#ifdef SHADOW_CASTER_PASS
+    float3 posWS = TransformObjectToWorld(posOS);
+    output.vertex = GetShadowPositionHClip(posWS, normalWS);
+#else
     output.vertex = TransformObjectToHClip(posOS);
+#endif
     output.uv = uv;
     output.fogCoord = ComputeFogFactor(output.vertex.z);
     output.finUv = finUv;
@@ -57,11 +63,11 @@ void AppendFinVertices(
     float2 uv12 = (TRANSFORM_TEX(input1.uv, _BaseMap) + TRANSFORM_TEX(input2.uv, _BaseMap)) / 2;
     float uvOffset = length(uv0);
     float uvXScale = length(uv0 - uv12) * _Density;
-
-    AppendFinVertex(stream, uv0, posOS0, float2(uvOffset, 0.0));
-    AppendFinVertex(stream, uv12, posOS3, float2(uvOffset + uvXScale, 0.0));
-
     float3 normalWS = TransformObjectToWorldNormal(normalOS);
+
+    AppendFinVertex(stream, uv0, posOS0, normalWS, float2(uvOffset, 0.0));
+    AppendFinVertex(stream, uv12, posOS3, normalWS, float2(uvOffset + uvXScale, 0.0));
+
     float3 posWS = TransformObjectToWorld(posOS0);
     float finStep = _FinLength / _FinJointNum;
     float3 windAngle = _Time.w * _WindFreq.xyz;
@@ -76,8 +82,8 @@ void AppendFinVertices(
         float3 moveOS = TransformWorldToObjectDir(moveWS, false);
         posOS0 += moveOS;
         posOS3 += moveOS;
-        AppendFinVertex(stream, uv0, posOS0, float2(uvOffset, finFactor));
-        AppendFinVertex(stream, uv12, posOS3, float2(uvOffset + uvXScale, finFactor));
+        AppendFinVertex(stream, uv0, posOS0, normalWS, float2(uvOffset, finFactor));
+        AppendFinVertex(stream, uv12, posOS3, normalWS, float2(uvOffset + uvXScale, finFactor));
     }
     stream.RestartStrip();
 }
@@ -105,7 +111,6 @@ void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
     float3 viewDirOS = GetViewDirectionOS(centerOS);
     float eyeDotN = dot(viewDirOS, normalOS);
     if (abs(eyeDotN) > _FaceViewProdThresh) return;
-    //normalOS *= min(_FaceViewProdThresh / pow(eyeDotN, 2), 1.0);
 
     normalOS += rand3(input[0].uv) * _RandomDirection;
     normalOS = normalize(normalOS);
@@ -117,17 +122,16 @@ void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
 #endif
 }
 
-float4 frag(Varyings input) : SV_Target
+void frag(
+    Varyings input, 
+    out float4 outColor : SV_Target, 
+    out float outDepth : SV_Depth)
 {
     float4 furColor = SAMPLE_TEXTURE2D(_FurMap, sampler_FurMap, input.finUv);
-    if (input.finUv.x >= 0.0 && furColor.a < _AlphaCutout) discard;
+    float alpha = furColor.a;
+    if (alpha < _AlphaCutout) discard;
 
-    float4 color = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv);
-    color *= _BaseColor;
-    color *= furColor;
-    color.rgb *= lerp(1.0 - _Occlusion, 1.0, max(input.finUv.y, 0.0));
-    color.rgb = MixFog(color.rgb, input.fogCoord);
-    return color;
+    outColor = outDepth = input.vertex.z / input.vertex.w;
 }
 
 #endif

@@ -1,4 +1,4 @@
-Shader "Fur/Fin/Unlit"
+Shader "Fur/Geometry/Unlit"
 {
 
 Properties
@@ -8,14 +8,8 @@ Properties
     _BaseMap("Base Map", 2D) = "white" {}
 
     [Header(Fur)][Space]
-    [Toggle(DRAW_ORIG_POLYGON)]_DrawOrigPolygon("Draw Original Polygon", Float) = 1
-    [Toggle(APPEND_MORE_FINS)]_AppendMoreFins("Append More Fins", Float) = 1
-    [NoScaleOffset] _FurMap("Fur Map", 2D) = "white" {}
-    [IntRange] _FinJointNum("Fin Joint Num", Range(1, 10)) = 5
-    _AlphaCutout("Alpha Cutout", Range(0.0, 1.0)) = 0.2
-    _FinLength("Length", Range(0.0, 1.0)) = 0.1
-    _Density("Density", Range(0.1, 10.0)) = 1.0
-    _FaceViewProdThresh("Direction Threshold", Range(0.0, 1.0)) = 0.1
+    _FurLength("Fur Length", Range(0.0, 2.0)) = 0.3
+    [IntRange] _FurJoint("Fur Joint", Range(0, 6)) = 3
     _Occlusion("Occlusion", Range(0.0, 1.0)) = 0.3
     _RandomDirection("Random Direction", Range(0.0, 1.0)) = 0.3
 
@@ -40,7 +34,7 @@ SubShader
     }
 
     ZWrite On
-    Cull Off
+    Cull Back
 
     Pass
     {
@@ -49,8 +43,6 @@ SubShader
         HLSLPROGRAM
         #pragma exclude_renderers gles gles3 glcore
         #pragma multi_compile_fog
-        #pragma multi_compile _ DRAW_ORIG_POLYGON
-        #pragma multi_compile _ APPEND_MORE_FINS
         #pragma vertex vert
         #pragma require tessellation tessHW
         #pragma hull hull
@@ -58,8 +50,8 @@ SubShader
         #pragma require geometry
         #pragma geometry geom 
         #pragma fragment frag
-        #include "./FurFinUnlit.hlsl"
-        #include "./FurFinUnlitTessellation.hlsl"
+        #include "./Unlit.hlsl"
+        #include "./UnlitTessellation.hlsl"
         ENDHLSL
     }
 
@@ -83,8 +75,8 @@ SubShader
         #pragma require geometry
         #pragma geometry geom 
         #pragma fragment frag
-        #include "./FurFinShadow.hlsl"
-        #include "./FurFinUnlitTessellation.hlsl"
+        #include "./Shadow.hlsl"
+        #include "./UnlitTessellation.hlsl"
         ENDHLSL
     }
 
@@ -110,8 +102,8 @@ SubShader
         #pragma geometry geom 
         #pragma fragment frag
         #define SHADOW_CASTER_PASS
-        #include "./FurFinShadow.hlsl"
-        #include "./FurFinUnlitTessellation.hlsl"
+        #include "./Shadow.hlsl"
+        #include "./UnlitTessellation.hlsl"
         ENDHLSL
     }
 }

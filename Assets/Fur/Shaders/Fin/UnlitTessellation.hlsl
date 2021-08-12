@@ -1,7 +1,9 @@
-#ifndef FUR_FIN_LIT_TESSELLATION_HLSL
-#define FUR_FIN_LIT_TESSELLATION_HLSL
+#ifndef FUR_FIN_UNLIT_TESSELLATION_HLSL
+#define FUR_FIN_UNLIT_TESSELLATION_HLSL
 
-#include "./FurFinParam.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/Shaders/UnlitInput.hlsl"
+#include "./Param.hlsl"
+#include "../Common/Common.hlsl"
 
 struct HsConstantOutput
 {
@@ -107,14 +109,10 @@ Attributes domain(
         hsConst.f3N110 * fW * fU +
         hsConst.f3N011 * fU * fV +
         hsConst.f3N101 * fW * fV);
-    o.texcoord = 
-        i[0].texcoord * fW + 
-        i[1].texcoord * fU + 
-        i[2].texcoord * fV;
-    o.lightmapUV = 
-        i[0].lightmapUV * fW + 
-        i[1].lightmapUV * fU + 
-        i[2].lightmapUV * fV;
+    o.uv = 
+        i[0].uv * fW + 
+        i[1].uv * fU + 
+        i[2].uv * fV;
 
     return o;
 }

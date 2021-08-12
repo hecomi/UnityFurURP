@@ -1,9 +1,7 @@
 #ifndef FUR_FIN_UNLIT_TESSELLATION_HLSL
 #define FUR_FIN_UNLIT_TESSELLATION_HLSL
 
-#include "Packages/com.unity.render-pipelines.universal/Shaders/UnlitInput.hlsl"
-#include "./FurFinParam.hlsl"
-#include "./FurCommon.hlsl"
+#include "./Param.hlsl"
 
 struct HsConstantOutput
 {

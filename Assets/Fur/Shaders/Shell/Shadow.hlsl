@@ -3,8 +3,8 @@
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
-#include "./FurShellParam.hlsl"
-#include "./FurCommon.hlsl"
+#include "./Param.hlsl"
+#include "../Common/Common.hlsl"
 
 struct Attributes
 {

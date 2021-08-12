@@ -20,7 +20,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 10309, guid: 0000000000000000f000000000000000, type: 0}
         m_Scale: {x: 10, y: 10}
         m_Offset: {x: 0, y: 0}
     - _FurMap:
@@ -54,7 +54,7 @@ Material:
     - _TessMinDist: 1
     m_Colors:
     - _AmbientColor: {r: 0.037320513, g: 0.09325546, b: 0.16037738, a: 1}
-    - _BaseColor: {r: 0.8773585, g: 0.65695924, b: 0.3034887, a: 1}
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _BaseMove: {r: 0, g: -0.4, b: 0, a: 3}
     - _WindFreq: {r: 1, g: 0.4, b: 0.2, a: 1}
     - _WindMove: {r: 0.5, g: 0.3, b: 0.2, a: 2}

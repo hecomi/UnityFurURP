@@ -70,7 +70,7 @@ SubShader
         #pragma require geometry
         #pragma geometry geom 
         #pragma fragment frag
-        #include "./FurShellLit.hlsl"
+        #include "./Lit.hlsl"
         ENDHLSL
     }
 
@@ -88,7 +88,7 @@ SubShader
         #pragma require geometry
         #pragma geometry geom 
         #pragma fragment frag
-        #include "./FurShellDepth.hlsl"
+        #include "./Depth.hlsl"
         ENDHLSL
     }
 
@@ -107,7 +107,7 @@ SubShader
         #pragma require geometry
         #pragma geometry geom 
         #pragma fragment frag
-        #include "./FurShellShadow.hlsl"
+        #include "./Shadow.hlsl"
         ENDHLSL
     }
 }

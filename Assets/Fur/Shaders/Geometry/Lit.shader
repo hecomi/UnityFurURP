@@ -1,4 +1,4 @@
-Shader "Fur/Fin/Lit"
+Shader "Fur/Geometry/Lit"
 {
 
 Properties
@@ -11,18 +11,11 @@ Properties
     _Smoothness("Smoothness", Range(0.0, 1.0)) = 0.5
 
     [Header(Fur)][Space]
-    [Toggle(DRAW_ORIG_POLYGON)]_DrawOrigPolygon("Draw Original Polygon", Float) = 1
-    [NoScaleOffset] _FurMap("Fur Map", 2D) = "white" {}
-    [NoScaleOffset] [Normal] _NormalMap("Normal", 2D) = "bump" {}
-    _NormalScale("Normal Scale", Range(0.0, 2.0)) = 0.0
-    _FaceNormalFactor("Face Normal Factor", Range(0.0, 0.5)) = 0.1
-    [IntRange] _FinJointNum("Fin Joint Num", Range(1, 8)) = 3
-    _AlphaCutout("Alpha Cutout", Range(0.0, 1.0)) = 0.2
-    _FinLength("Length", Range(0.0, 1.0)) = 0.1
-    _Density("Density", Range(0.1, 10.0)) = 1.0
-    _FaceViewProdThresh("Direction Threshold", Range(0.0, 1.0)) = 0.1
+    _FurLength("Fur Length", Range(0.0, 2.0)) = 0.3
+    [IntRange] _FurJoint("Fur Joint", Range(0, 6)) = 3
     _Occlusion("Occlusion", Range(0.0, 1.0)) = 0.3
     _RandomDirection("Random Direction", Range(0.0, 1.0)) = 0.3
+    _NormalFactor("Normal Factor", Range(0.0, 1.0)) = 0.0
 
     [Header(Move)][Space]
     _BaseMove("Base Move", Vector) = (0.0, -0.0, 0.0, 3.0)
@@ -30,9 +23,9 @@ Properties
     _WindMove("Wind Move", Vector) = (0.2, 0.3, 0.2, 1.0)
 
     [Header(Tesselation)][Space]
-    _TessMinDist("Tesselation Min Distance", Range(0.1, 50)) = 1.0
-    _TessMaxDist("Tesselation Max Distance", Range(0.1, 50)) = 10.0
-    _TessFactor("Tessellation Factor", Range(1, 10)) = 5
+    _TessMinDist("Tesselation Min Distance", Range(0.1, 10)) = 1.0
+    _TessMaxDist("Tesselation Max Distance", Range(0.1, 100)) = 10.0
+    _TessFactor("Tessellation Factor", Range(1, 10)) = 4 
 
     [Header(Lighting)][Space]
     _RimLightPower("Rim Light Power", Range(1.0, 20.0)) = 6.0
@@ -49,6 +42,9 @@ SubShader
         "UniversalMaterialType" = "Lit"
         "IgnoreProjector" = "True"
     }
+
+    ZWrite On
+    Cull Back
 
     Pass
     {
@@ -81,8 +77,8 @@ SubShader
         #pragma require geometry
         #pragma geometry geom 
         #pragma fragment frag
-        #include "./FurFinLit.hlsl"
-        #include "./FurFinLitTessellation.hlsl"
+        #include "./Lit.hlsl"
+        #include "./LitTessellation.hlsl"
         ENDHLSL
     }
 
@@ -93,7 +89,6 @@ SubShader
 
         ZWrite On
         ColorMask 0
-        Cull Off
 
         HLSLPROGRAM
         #pragma exclude_renderers gles gles3 glcore
@@ -107,8 +102,8 @@ SubShader
         #pragma require geometry
         #pragma geometry geom 
         #pragma fragment frag
-        #include "./FurFinShadow.hlsl"
-        #include "./FurFinUnlitTessellation.hlsl"
+        #include "./Shadow.hlsl"
+        #include "./UnlitTessellation.hlsl"
         ENDHLSL
     }
 
@@ -120,7 +115,6 @@ SubShader
         ZWrite On
         ZTest LEqual
         ColorMask 0
-        Cull Off
 
         HLSLPROGRAM
         #pragma exclude_renderers gles gles3 glcore
@@ -135,8 +129,8 @@ SubShader
         #pragma geometry geom 
         #pragma fragment frag
         #define SHADOW_CASTER_PASS
-        #include "./FurFinShadow.hlsl"
-        #include "./FurFinUnlitTessellation.hlsl"
+        #include "./Shadow.hlsl"
+        #include "./UnlitTessellation.hlsl"
         ENDHLSL
     }
 }
