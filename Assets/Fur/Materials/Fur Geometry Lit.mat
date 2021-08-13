@@ -24,23 +24,27 @@ Material:
         m_Scale: {x: 10, y: 10}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _FurJoint: 5
+    - _Damper: 1
+    - _FurJoint: 2
     - _FurLength: 0.2
+    - _Gravity: -0.5
     - _Metallic: 0
-    - _NormalFactor: 0.476
+    - _MoveScale: 1
+    - _NormalFactor: 0.577
     - _Occlusion: 0.894
-    - _RandomDirection: 0.721
+    - _RandomDirection: 0.647
     - _RimLightIntensity: 0.908
     - _RimLightPower: 3.44
     - _ShadowExtraBias: -0.336
     - _Smoothness: 0.404
-    - _TessFactor: 3.6
+    - _Spring: 5
+    - _TessFactor: 3.1
     - _TessMaxDist: 10
     - _TessMinDist: 1
     m_Colors:
-    - _AmbientColor: {r: 0.07214904, g: 0.13214351, b: 0.1792453, a: 1}
+    - _AmbientColor: {r: 0.072149016, g: 0.13214347, b: 0.17924526, a: 1}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
-    - _BaseMove: {r: 0, g: -0.4, b: 0, a: 2}
+    - _BaseMove: {r: 0, g: 0, b: 0, a: 2}
     - _WindFreq: {r: 0.5, g: 0.7, b: 0.9, a: 1}
-    - _WindMove: {r: 0.2, g: 0, b: 0.2, a: 2}
+    - _WindMove: {r: 0.3, g: 0.1, b: 0.2, a: 2}
   m_BuildTextureStacks: []

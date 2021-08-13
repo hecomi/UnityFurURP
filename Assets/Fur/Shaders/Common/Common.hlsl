@@ -83,4 +83,14 @@ inline float3 rand3(float2 seed)
     return 2.0 * (float3(rand(seed * 1), rand(seed * 2), rand(seed * 3)) - 0.5);
 }
 
+struct FurMoverData
+{
+    float3 posWS;
+    float3 dPosWS;
+    float3 velocityWS;
+    float time;
+};
+
+RWStructuredBuffer<FurMoverData> _Buffer : register(u1);
+
 #endif

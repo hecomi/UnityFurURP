@@ -115,6 +115,7 @@ Attributes domain(
         i[0].lightmapUV * fW + 
         i[1].lightmapUV * fU + 
         i[2].lightmapUV * fV;
+    o.id = i[0].id;
 
     return o;
 }

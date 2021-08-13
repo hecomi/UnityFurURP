@@ -31,6 +31,12 @@ Properties
     _RimLightPower("Rim Light Power", Range(1.0, 20.0)) = 6.0
     _RimLightIntensity("Rim Light Intensity", Range(0.0, 1.0)) = 0.5
     _ShadowExtraBias("Shadow Extra Bias", Range(-1.0, 1.0)) = 0.0
+
+    [Header(Move)][Space]
+    _MoveScale("MoveScale", Range(0.0, 5.0)) = 1.0
+    _Spring("Spring", Range(0.0, 20.0)) = 5.0
+    _Damper("Damper", Range(0.0, 10.0)) = 1.0
+    _Gravity("Gravity", Range(-10.0, 10.0)) = -2.0
 }
 
 SubShader
@@ -68,6 +74,7 @@ SubShader
         #pragma multi_compile _ LIGHTMAP_ON
         #pragma multi_compile_fog
 
+        #pragma target 5.0
         #pragma exclude_renderers gles gles3 glcore
         #pragma multi_compile _ DRAW_ORIG_POLYGON
         #pragma vertex vert

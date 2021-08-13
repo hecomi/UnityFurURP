@@ -16,4 +16,9 @@ float _TessMinDist;
 float _TessMaxDist;
 float _TessFactor;
 
+float _MoveScale;
+float _Spring;
+float _Damper;
+float _Gravity;
+
 #endif

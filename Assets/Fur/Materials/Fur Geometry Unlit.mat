@@ -35,11 +35,11 @@ Material:
     - _FaceViewProdThresh: 0.1
     - _FinJointNum: 5
     - _FinLength: 0.1
-    - _FurJoint: 5
+    - _FurJoint: 1
     - _FurLength: 0.15
     - _Occlusion: 0.587
     - _RandomDirection: 0.385
-    - _TessFactor: 1
+    - _TessFactor: 2.5
     - _TessMaxDist: 5
     - _TessMinDist: 1
     m_Colors:

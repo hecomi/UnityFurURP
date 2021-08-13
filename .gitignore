@@ -74,3 +74,4 @@ crashlytics-build.properties
 shadertoolsconfig.json
 .vsconfig
 /Assets/HLSLToolsForVisualStudioConfigGenerator*
+/Assets/UnityChan*

@@ -7,12 +7,22 @@
 #include "./Param.hlsl"
 #include "../Common/Common.hlsl"
 
+struct _Attributes
+{
+    float4 positionOS : POSITION;
+    float3 normalOS : NORMAL;
+    float2 texcoord : TEXCOORD0;
+    float2 lightmapUV : TEXCOORD1;
+    uint id : SV_VertexID;
+};
+
 struct Attributes
 {
     float4 positionOS : POSITION;
     float3 normalOS : NORMAL;
     float2 texcoord : TEXCOORD0;
     float2 lightmapUV : TEXCOORD1;
+    uint id : TEXCOORD2;
 };
 
 struct Varyings
@@ -26,9 +36,28 @@ struct Varyings
     float factor : TEXCOORD6;
 };
 
-Attributes vert(Attributes input)
+Attributes vert(_Attributes input)
 {
-    return input;
+    FurMoverData data = _Buffer[input.id];
+
+    float time = _Time.y;
+    if (abs(time - data.time) > 1e-3)
+    {
+        float3 targetPosWS = TransformObjectToWorld(input.positionOS.xyz);
+        float3 dPosWS = targetPosWS - data.posWS;
+        float3 forceWS = _Spring * dPosWS - data.velocityWS * _Damper + float3(0.0, _Gravity, 0.0);
+        float3 normalWS = TransformObjectToWorldNormal(input.normalOS, true);
+        float dt = 1.0 / 60;
+        data.velocityWS += forceWS * dt;
+        data.posWS += data.velocityWS * dt;
+        data.dPosWS = (data.posWS - targetPosWS) * _MoveScale;
+        float move = length(data.dPosWS);
+        data.dPosWS = min(move, 1.0) / max(move, 0.01) * data.dPosWS;
+        data.time = time;
+        _Buffer[input.id] = data;
+    }
+
+    return (Attributes)input;
 }
 
 void AppendVertex(
@@ -58,9 +87,13 @@ void AppendVertex(
     stream.Append(output);
 }
 
-[maxvertexcount(51)]
+[maxvertexcount(45)]
 void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
 {
+    uint id0 = input[0].id;
+    uint id1 = input[1].id;
+    uint id2 = input[2].id;
+
     float3 startPos0OS = input[0].positionOS.xyz;
     float3 startPos1OS = input[1].positionOS.xyz;
     float3 startPos2OS = input[2].positionOS.xyz;
@@ -99,7 +132,8 @@ void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
     float3 windAngle = _Time.w * _WindFreq.xyz;
     float3 windMoveWS = _WindMove.xyz * sin(windAngle + startCenterPosWS * _WindMove.w);
     float3 baseMoveWS = _BaseMove.xyz;
-    float3 movedFaceNormalWS = faceNormalWS + (baseMoveWS + windMoveWS);
+    float3 vertMoveWS = (_Buffer[id0].dPosWS + _Buffer[id1].dPosWS + _Buffer[id2].dPosWS) / 3;
+    float3 movedFaceNormalWS = faceNormalWS + (baseMoveWS + windMoveWS) + vertMoveWS;
     float3 movedFaceNormalOS = TransformWorldToObjectNormal(movedFaceNormalWS, true);
     float3 topMovedPosOS = startCenterPosOS + movedFaceNormalOS * _FurLength;
 
