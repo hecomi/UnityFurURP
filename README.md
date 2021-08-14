@@ -9,6 +9,7 @@ This is an example of a fur shader implementation in Universal Render Pipleine. 
 - Lit / Unlit
 - Lighting calculation using a normal map
 - Rim lighting
+- Movement by animations
 
 
 Screenshots
@@ -25,6 +26,12 @@ Screenshots
 ### Compare
 <img src="https://raw.githubusercontent.com/wiki/hecomi/UnityFurURP/Compare.gif" width="720" />
 
+### Move
+<img src="https://raw.githubusercontent.com/wiki/hecomi/UnityFurURP/Screenshot4.gif" width="720" /><br/>
+<img src="https://raw.githubusercontent.com/wiki/hecomi/UnityFurURP/Screenshot5.gif" width="720" /><br/>
+<img src="https://raw.githubusercontent.com/wiki/hecomi/UnityFurURP/Screenshot6.gif" width="720" />
+
+
 Demo
 ----
 - Comparing Shell and Fin
@@ -39,6 +46,8 @@ Articles
     - https://tips.hecomi.com/entry/2021/07/24/121420
 - Fur Polygon
     - https://tips.hecomi.com/entry/2021/08/12/155948
+- Fur Move
+    - https://tips.hecomi.com/entry/2021/08/14/115756
 
 
 License
