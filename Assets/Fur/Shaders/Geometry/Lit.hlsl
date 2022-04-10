@@ -260,7 +260,7 @@ float4 frag(Varyings input) : SV_Target
     inputData.positionWS = input.positionWS;
     inputData.normalWS = SafeNormalize(input.normalWS);
     inputData.viewDirectionWS = SafeNormalize(GetCameraPositionWS() - input.positionWS);
-#if defined(_MAIN_LIGHT_SHADOWS) && !defined(_RECEIVE_SHADOWS_OFF)
+#if (defined(_MAIN_LIGHT_SHADOWS) || defined(_MAIN_LIGHT_SHADOWS_CASCADE) || defined(_MAIN_LIGHT_SHADOWS_SCREEN)) && !defined(_RECEIVE_SHADOWS_OFF)
     inputData.shadowCoord = TransformWorldToShadowCoord(input.positionWS);
 #else
     inputData.shadowCoord = float4(0, 0, 0, 0);
@@ -270,18 +270,10 @@ float4 frag(Varyings input) : SV_Target
     inputData.bakedGI = SAMPLE_GI(input.lightmapUV, input.vertexSH, inputData.normalWS);
 
 #if 1
-    /*float4 color = UniversalFragmentPBR(inputData, surfaceData);
+    float4 color = UniversalFragmentPBR(inputData, surfaceData);
     ApplyRimLight(color.rgb, inputData.positionWS, inputData.viewDirectionWS, inputData.normalWS);
     color.rgb += _AmbientColor.rgb;
-    color.rgb = clamp(MixFog(color.rgb, inputData.fogCoord), 0, 1);*/
-
-    Light mainLight = GetMainLight(TransformWorldToShadowCoord(input.positionWS));
-    float shadow = mainLight.distanceAttenuation * mainLight.shadowAttenuation;
-    float4 color = UniversalFragmentPBR(inputData, surfaceData);
-
-    color.rgb *= shadow;
-    //ApplyRimLight(color.rgb, input.positionWS, viewDirWS, normalWS);
-    color.rgb = clamp(color.rgb + _AmbientColor, 0, 1);
+    color.rgb = clamp(MixFog(color.rgb, inputData.fogCoord), 0, 1);
 #else
     float4 color = clamp(float4(inputData.normalWS, 1.0), 0, 1);
 #endif
