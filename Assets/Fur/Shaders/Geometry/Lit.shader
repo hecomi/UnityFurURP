@@ -70,6 +70,8 @@ SubShader
         #pragma multi_compile _ _MIXED_LIGHTING_SUBTRACTIVE
 
         // Unity
+        #pragma multi_compile_instancing
+        #pragma multi_compile _ DOTS_INSTANCING_ON
         #pragma multi_compile _ DIRLIGHTMAP_COMBINED
         #pragma multi_compile _ LIGHTMAP_ON
         #pragma multi_compile_fog
@@ -99,6 +101,8 @@ SubShader
 
         HLSLPROGRAM
         #pragma exclude_renderers gles gles3 glcore
+        #pragma multi_compile_instancing
+        #pragma multi_compile _ DOTS_INSTANCING_ON
         #pragma multi_compile_fog
         #pragma multi_compile _ DRAW_ORIG_POLYGON
         #pragma multi_compile _ APPEND_MORE_FINS
@@ -126,6 +130,8 @@ SubShader
         HLSLPROGRAM
         #pragma exclude_renderers gles gles3 glcore
         #pragma multi_compile_fog
+        #pragma multi_compile_instancing
+        #pragma multi_compile _ DOTS_INSTANCING_ON
         #pragma multi_compile _ DRAW_ORIG_POLYGON
         #pragma multi_compile _ APPEND_MORE_FINS
         #pragma vertex vert
@@ -141,5 +147,4 @@ SubShader
         ENDHLSL
     }
 }
-
 }
