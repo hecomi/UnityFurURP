@@ -1,6 +1,7 @@
 #ifndef FUR_SHELL_LIT_HLSL
 #define FUR_SHELL_LIT_HLSL
 
+#include "HLSLSupport.cginc"
 #include "Packages/com.unity.render-pipelines.universal/Shaders/LitInput.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
 #include "./Param.hlsl"
@@ -16,6 +17,17 @@ struct Attributes
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
+struct v2f
+{
+    float4 positionOS : POSITION;
+    float3 normalOS : NORMAL;
+    float4 tangentOS : TANGENT;
+    float2 texcoord : TEXCOORD0;
+    float2 lightmapUV : TEXCOORD1;
+    UNITY_VERTEX_INPUT_INSTANCE_ID
+    UNITY_VERTEX_OUTPUT_STEREO
+};
+
 struct Varyings
 {
     float4 positionCS : SV_POSITION;
@@ -26,16 +38,26 @@ struct Varyings
     DECLARE_LIGHTMAP_OR_SH(lightmapUV, vertexSH, 5);
     float4 fogFactorAndVertexLight : TEXCOORD6; // x: fogFactor, yzw: vertex light
     float  layer : TEXCOORD7;
+    UNITY_VERTEX_OUTPUT_STEREO
 };
 
-Attributes vert(Attributes input)
+v2f vert(Attributes input)
 {
-    return input;
+    v2f o;
+    UNITY_INITIALIZE_OUTPUT(v2f, o);
+    UNITY_TRANSFER_INSTANCE_ID(input, o);
+    o.positionOS = input.positionOS;
+    o.normalOS = input.normalOS;
+    o.tangentOS = input.tangentOS;
+    o.lightmapUV = input.lightmapUV;
+    o.texcoord = input.texcoord;
+    return o;
 }
 
-void AppendShellVertex(inout TriangleStream<Varyings> stream, Attributes input, int index)
+void AppendShellVertex(inout TriangleStream<Varyings> stream, v2f input, int index)
 {
     Varyings output = (Varyings)0;
+    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
     VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
     VertexNormalInputs normalInput = GetVertexNormalInputs(input.normalOS, input.tangentOS);
@@ -66,8 +88,9 @@ void AppendShellVertex(inout TriangleStream<Varyings> stream, Attributes input, 
 }
 
 [maxvertexcount(42)]
-void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
+void geom(triangle v2f input[3], inout TriangleStream<Varyings> stream)
 {
+    UNITY_SETUP_INSTANCE_ID(input[0]);
     [loop] for (float i = 0; i < _ShellAmount; ++i)
     {
         [unroll] for (float j = 0; j < 3; ++j)
@@ -108,7 +131,7 @@ float4 frag(Varyings input) : SV_Target
     inputData.positionWS = input.positionWS;
     inputData.normalWS = normalWS;
     inputData.viewDirectionWS = viewDirWS;
-#if defined(_MAIN_LIGHT_SHADOWS) && !defined(_RECEIVE_SHADOWS_OFF)
+#if (defined(_MAIN_LIGHT_SHADOWS) || defined(_MAIN_LIGHT_SHADOWS_CASCADE) || defined(_MAIN_LIGHT_SHADOWS_SCREEN)) && !defined(_RECEIVE_SHADOWS_OFF)
     inputData.shadowCoord = TransformWorldToShadowCoord(input.positionWS);
 #else
     inputData.shadowCoord = float4(0, 0, 0, 0);
@@ -117,11 +140,14 @@ float4 frag(Varyings input) : SV_Target
     inputData.vertexLighting = input.fogFactorAndVertexLight.yzw;
     inputData.bakedGI = SAMPLE_GI(input.lightmapUV, input.vertexSH, normalWS);
 
+    Light mainLight = GetMainLight(TransformWorldToShadowCoord(input.positionWS));
+    float shadow = mainLight.distanceAttenuation * mainLight.shadowAttenuation;
     float4 color = UniversalFragmentPBR(inputData, surfaceData);
 
+    color.rgb *= shadow;
     ApplyRimLight(color.rgb, input.positionWS, viewDirWS, normalWS);
     color.rgb += _AmbientColor;
-    color.rgb = MixFog(color.rgb, inputData.fogCoord);
+    color.rgb = clamp(MixFog(color.rgb, inputData.fogCoord), 0, 1);
 
     return color;
 }

@@ -1,11 +1,21 @@
 #ifndef FUR_FIN_LIT_HLSL
 #define FUR_FIN_LIT_HLSL
 
+#include "HLSLSupport.cginc"
 #include "Packages/com.unity.render-pipelines.universal/Shaders/LitInput.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+//#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #include "./Param.hlsl"
 #include "../Common/Common.hlsl"
+
+struct _Attributes
+{
+    float4 positionOS : POSITION;
+    float3 normalOS : NORMAL;
+    float2 texcoord : TEXCOORD0;
+    float2 lightmapUV : TEXCOORD1;
+    UNITY_VERTEX_INPUT_INSTANCE_ID
+};
 
 struct Attributes
 {
@@ -13,6 +23,8 @@ struct Attributes
     float3 normalOS : NORMAL;
     float2 texcoord : TEXCOORD0;
     float2 lightmapUV : TEXCOORD1;
+    UNITY_VERTEX_INPUT_INSTANCE_ID
+    UNITY_VERTEX_OUTPUT_STEREO
 };
 
 struct Varyings
@@ -25,11 +37,20 @@ struct Varyings
     float4 fogFactorAndVertexLight : TEXCOORD4; // x: fogFactor, yzw: vertex light
     float2 finUv : TEXCOORD5;
     float3 finTangentWS : TEXCOORD6;
+    UNITY_VERTEX_OUTPUT_STEREO
 };
 
-Attributes vert(Attributes input)
+Attributes vert(_Attributes input)
 {
-    return input;
+    Attributes o;
+    UNITY_INITIALIZE_OUTPUT(Attributes, o);
+    UNITY_SETUP_INSTANCE_ID(input);
+    UNITY_TRANSFER_INSTANCE_ID(input, o);
+    o.positionOS = input.positionOS;
+    o.normalOS = input.normalOS;
+    o.lightmapUV = input.lightmapUV;
+    o.texcoord = input.texcoord;
+    return o;
 }
 
 void AppendFinVertex(
@@ -39,9 +60,10 @@ void AppendFinVertex(
     float3 posOS, 
     float3 normalOS, 
     float2 finUv,
-    float3 finSideDirWS)
+    float3 finSideDirWS,
+    Attributes input0)
 {
-    Varyings output = (Varyings)0;
+    Varyings output;
 
     VertexPositionInputs vertexInput = GetVertexPositionInputs(posOS);
     output.positionCS = vertexInput.positionCS;
@@ -58,6 +80,7 @@ void AppendFinVertex(
     OUTPUT_LIGHTMAP_UV(lightmapUV, unity_LightmapST, output.lightmapUV);
     OUTPUT_SH(output.normalWS, output.vertexSH);
 
+    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
     stream.Append(output);
 }
 
@@ -116,15 +139,15 @@ void AppendFinVertices(
             {
                 
                 float3 finNormalOS = normalize(lerp(normalOS0, faceNormalOS, _FaceNormalFactor));
-                AppendFinVertex(stream, uv0, lightmapUV0, posBeginOS, finNormalOS, float2(uvX1, finFactor), finSideDirWS);
-                AppendFinVertex(stream, uv12, lightmapUV12, posEndOS, finNormalOS, float2(uvX2, finFactor), finSideDirWS);
+                AppendFinVertex(stream, uv0, lightmapUV0, posBeginOS, finNormalOS, float2(uvX1, finFactor), finSideDirWS, input0);
+                AppendFinVertex(stream, uv12, lightmapUV12, posEndOS, finNormalOS, float2(uvX2, finFactor), finSideDirWS, input0);
             }
             else
             {
                 faceNormalOS *= -1.0;
                 float3 finNormalOS = normalize(lerp(normalOS0, faceNormalOS, _FaceNormalFactor));
-                AppendFinVertex(stream, uv12, lightmapUV12, posEndOS, finNormalOS, float2(uvX2, finFactor), finSideDirWS);
-                AppendFinVertex(stream, uv0, lightmapUV0, posBeginOS, finNormalOS, float2(uvX1, finFactor), finSideDirWS);
+                AppendFinVertex(stream, uv12, lightmapUV12, posEndOS, finNormalOS, float2(uvX2, finFactor), finSideDirWS, input0);
+                AppendFinVertex(stream, uv0, lightmapUV0, posBeginOS, finNormalOS, float2(uvX1, finFactor), finSideDirWS, input0);
             }
         }
 
@@ -135,10 +158,12 @@ void AppendFinVertices(
 [maxvertexcount(39)]
 void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
 {
+    UNITY_SETUP_INSTANCE_ID(input[0]);
 #ifdef DRAW_ORIG_POLYGON
     for (int i = 0; i < 3; ++i)
     {
-        Varyings output = (Varyings)0;
+        Varyings output;
+        UNITY_INITIALIZE_OUTPUT(Varyings, output);
 
         VertexPositionInputs vertexInput = GetVertexPositionInputs(input[i].positionOS.xyz);
         output.positionCS = vertexInput.positionCS;
@@ -154,6 +179,7 @@ void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
         OUTPUT_LIGHTMAP_UV(input[i].lightmapUV, unity_LightmapST, output.lightmapUV);
         OUTPUT_SH(output.normalWS, output.vertexSH);
 
+        UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
         stream.Append(output);
     }
     stream.RestartStrip();
@@ -172,6 +198,7 @@ void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
 
 float4 frag(Varyings input) : SV_Target
 {
+    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(input);
     float4 furColor = SAMPLE_TEXTURE2D(_FurMap, sampler_FurMap, input.finUv);
     if (input.finUv.x >= 0.0 && furColor.a < _AlphaCutout) discard;
 
@@ -193,7 +220,7 @@ float4 frag(Varyings input) : SV_Target
     inputData.positionWS = input.positionWS;
     inputData.normalWS = normalWS;
     inputData.viewDirectionWS = viewDirWS;
-#if defined(_MAIN_LIGHT_SHADOWS) && !defined(_RECEIVE_SHADOWS_OFF)
+#if (defined(_MAIN_LIGHT_SHADOWS) || defined(_MAIN_LIGHT_SHADOWS_CASCADE) || defined(_MAIN_LIGHT_SHADOWS_SCREEN)) && !defined(_RECEIVE_SHADOWS_OFF)
     inputData.shadowCoord = TransformWorldToShadowCoord(input.positionWS);
 #else
     inputData.shadowCoord = float4(0, 0, 0, 0);
@@ -205,7 +232,7 @@ float4 frag(Varyings input) : SV_Target
     float4 color = UniversalFragmentPBR(inputData, surfaceData);
     ApplyRimLight(color.rgb, input.positionWS, viewDirWS, input.normalWS);
     color.rgb += _AmbientColor.rgb;
-    color.rgb = MixFog(color.rgb, inputData.fogCoord);
+    color.rgb = clamp(MixFog(color.rgb, inputData.fogCoord), 0, 1);
 
     return color;
 }

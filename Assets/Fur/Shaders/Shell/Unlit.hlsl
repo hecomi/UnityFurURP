@@ -4,6 +4,16 @@
 #include "Packages/com.unity.render-pipelines.universal/Shaders/UnlitInput.hlsl"
 #include "./Param.hlsl"
 #include "../Common/Common.hlsl"
+#include "HLSLSupport.cginc"
+
+struct _Attributes
+{
+    float4 positionOS : POSITION;
+    float3 normalOS : NORMAL;
+    float4 tangentOS : TANGENT;
+    float2 uv : TEXCOORD0;
+    UNITY_VERTEX_INPUT_INSTANCE_ID
+};
 
 struct Attributes
 {
@@ -11,6 +21,8 @@ struct Attributes
     float3 normalOS : NORMAL;
     float4 tangentOS : TANGENT;
     float2 uv : TEXCOORD0;
+    UNITY_VERTEX_INPUT_INSTANCE_ID
+    UNITY_VERTEX_OUTPUT_STEREO
 };
 
 struct Varyings
@@ -19,16 +31,25 @@ struct Varyings
     float2 uv : TEXCOORD0;
     float  fogCoord : TEXCOORD1;
     float  layer : TEXCOORD2;
+    UNITY_VERTEX_OUTPUT_STEREO
 };
 
-Attributes vert(Attributes input)
+Attributes vert(_Attributes input)
 {
-    return input;
+    Attributes output;
+    UNITY_INITIALIZE_OUTPUT(Attributes, output);
+    UNITY_TRANSFER_INSTANCE_ID(input, output);
+    output.positionOS = input.positionOS;
+    output.normalOS = input.normalOS;
+    output.uv = input.uv;
+    output.tangentOS = input.tangentOS;
+    return output;
 }
 
-void AppendShellVertex(inout TriangleStream<Varyings> stream, Attributes input, int index)
+void AppendShellVertex(inout TriangleStream<Varyings> stream, Attributes input, int index, Attributes input0)
 {
     Varyings output = (Varyings)0;
+    UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(input0, output);
 
     VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
     VertexNormalInputs normalInput = GetVertexNormalInputs(input.normalOS, input.tangentOS);
@@ -58,14 +79,16 @@ void AppendShellVertex(inout TriangleStream<Varyings> stream, Attributes input, 
     stream.Append(output);
 }
 
-[maxvertexcount(128)]
+[maxvertexcount(53)]
 void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
 {
+    UNITY_SETUP_INSTANCE_ID(input[0]);
+    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(input[0]);
     [loop] for (float i = 0; i < _ShellAmount; ++i)
     {
         [unroll] for (float j = 0; j < 3; ++j)
         {
-            AppendShellVertex(stream, input[j], i);
+            AppendShellVertex(stream, input[j], i, input[0]);
         }
         stream.RestartStrip();
     }
@@ -80,7 +103,7 @@ float4 frag(Varyings input) : SV_Target
     float4 baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv);
     float occlusion = lerp(1.0 - _Occlusion, 1.0, input.layer);
     float3 color = baseColor.xyz * occlusion;
-    color = MixFog(color, input.fogCoord);
+    color = clamp(MixFog(color, input.fogCoord), 0, 1);
 
     return float4(color, alpha);
 }
