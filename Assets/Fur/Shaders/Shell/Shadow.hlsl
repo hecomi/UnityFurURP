@@ -43,7 +43,7 @@ void AppendShellVertex(inout TriangleStream<Varyings> stream, Attributes input, 
     float3 move = moveFactor * _BaseMove.xyz;
 
     float3 shellDir = normalize(normalInput.normalWS + move + windMove);
-    float FurLength = SAMPLE_TEXTURE2D_LOD(_FurLengthMap, sampler_FurLengthMap, input.uv / _BaseMap_ST.xy * _FurScale, 0).x;
+    float FurLength = SAMPLE_TEXTURE2D_LOD(_FurLengthMap, sampler_FurLengthMap, input.uv / _BaseMap_ST.xy, 0).x;
     float3 posWS = vertexInput.positionWS + shellDir * (_ShellStep * index * FurLength * _FurLengthIntensity);
     //float4 posCS = TransformWorldToHClip(posWS);
     float4 posCS = GetShadowPositionHClip(posWS, normalInput.normalWS);
