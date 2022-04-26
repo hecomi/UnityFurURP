@@ -58,7 +58,7 @@ SubShader
 
     ZWrite On
     ZTest LEqual
-    Cull Off
+    Cull Back
 
     Pass
     {
@@ -68,7 +68,7 @@ SubShader
         ZWrite On
 
         HLSLPROGRAM
-        // URP §Œ•≠©`•Ô©`•…
+        // URP „ÅÆ„Ç≠„Éº„ÉØ„Éº„Éâ
         #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
         #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
         #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
@@ -82,7 +82,7 @@ SubShader
 
         #pragma multi_compile_fragment _ _FUR_SPECULAR
 
-        // Unity §Œ•≠©`•Ô©`•…
+        // Unity „ÅÆ„Ç≠„Éº„ÉØ„Éº„Éâ
         #pragma multi_compile _ DIRLIGHTMAP_COMBINED
         #pragma multi_compile _ LIGHTMAP_ON
         #pragma multi_compile_fog
