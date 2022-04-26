@@ -21,4 +21,13 @@ SAMPLER(sampler_NormalMap);
 float4 _NormalMap_ST;
 float _NormalScale;
 
+TEXTURE2D(_FurLengthMap);
+SAMPLER(sampler_FurLengthMap);
+float _FurLengthIntensity;
+
+float _Backlit;
+float _Area;
+float _MedulaScatter;
+float _MedulaAbsorb;
+float _Kappa;
 #endif

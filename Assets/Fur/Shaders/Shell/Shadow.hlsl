@@ -3,6 +3,8 @@
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
+// Declare "_BaseMap_ST" for line 46.
+#include "Packages/com.unity.render-pipelines.universal/Shaders/UnlitInput.hlsl"
 #include "./Param.hlsl"
 #include "../Common/Common.hlsl"
 
@@ -41,7 +43,8 @@ void AppendShellVertex(inout TriangleStream<Varyings> stream, Attributes input, 
     float3 move = moveFactor * _BaseMove.xyz;
 
     float3 shellDir = normalize(normalInput.normalWS + move + windMove);
-    float3 posWS = vertexInput.positionWS + shellDir * (_ShellStep * index);
+    float FurLength = SAMPLE_TEXTURE2D_LOD(_FurLengthMap, sampler_FurLengthMap, input.uv / _BaseMap_ST.xy * _FurScale, 0).x;
+    float3 posWS = vertexInput.positionWS + shellDir * (_ShellStep * index * FurLength * _FurLengthIntensity);
     //float4 posCS = TransformWorldToHClip(posWS);
     float4 posCS = GetShadowPositionHClip(posWS, normalInput.normalWS);
     

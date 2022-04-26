@@ -39,7 +39,8 @@ void AppendShellVertex(inout TriangleStream<Varyings> stream, Attributes input, 
     float3 move = moveFactor * _BaseMove.xyz;
 
     float3 shellDir = normalize(normalInput.normalWS + move + windMove);
-    float3 posWS = vertexInput.positionWS + shellDir * (_ShellStep * index);
+    float FurLength = SAMPLE_TEXTURE2D_LOD(_FurLengthMap, sampler_FurLengthMap, input.uv / _BaseMap_ST.xy * _FurScale, 0).x;
+    float3 posWS = vertexInput.positionWS + shellDir * (_ShellStep * index * FurLength * _FurLengthIntensity);
     float4 posCS = TransformWorldToHClip(posWS);
     
     output.vertex = posCS;
@@ -63,16 +64,16 @@ void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
     }
 }
 
-void frag(
-    Varyings input, 
-    out float4 outColor : SV_Target, 
-    out float outDepth : SV_Depth)
+// Previous frag() causes Depth Priming error (black pixels),
+// when enabling "Depth Priming + MSAA" in URP 12.1.
+float frag(Varyings input) : SV_TARGET
 {
-    float4 furColor = SAMPLE_TEXTURE2D(_FurMap, sampler_FurMap, input.uv * _FurScale);
+    float4 furColor = SAMPLE_TEXTURE2D(_FurMap, sampler_FurMap, input.uv / _BaseMap_ST.xy * _FurScale);
     float alpha = furColor.r * (1.0 - input.layer);
     if (input.layer > 0.0 && alpha < _AlphaCutout) discard;
 
-    outColor = outDepth = input.vertex.z / input.vertex.w;
+    // Divided by w of PositionCS gets wrong depth when enabling depth priming (Depth Prepass) on URP 12.1.
+    return input.vertex.z;
+    //outColor = outDepth = input.vertex.z / input.vertex.w;
 }
-
 #endif

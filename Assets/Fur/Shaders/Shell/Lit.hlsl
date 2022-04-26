@@ -5,6 +5,9 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
 #include "./Param.hlsl"
 #include "../Common/Common.hlsl"
+#if defined(_FUR_SPECULAR)
+#include "./FurSpecular.hlsl"
+#endif
 
 struct Attributes
 {
@@ -47,8 +50,9 @@ void AppendShellVertex(inout TriangleStream<Varyings> stream, Attributes input, 
     float3 move = moveFactor * _BaseMove.xyz;
     float3 shellDir = SafeNormalize(normalInput.normalWS + move + windMove);
     float3 viewDirWS = GetCameraPositionWS() - vertexInput.positionWS;
+    float FurLength = SAMPLE_TEXTURE2D_LOD(_FurLengthMap, sampler_FurLengthMap, input.texcoord / _BaseMap_ST.xy * _FurScale, 0).x;
     
-    output.positionWS = vertexInput.positionWS + shellDir * (_ShellStep * index);
+    output.positionWS = vertexInput.positionWS + shellDir * (_ShellStep * index * FurLength * _FurLengthIntensity);
     output.positionCS = TransformWorldToHClip(output.positionWS);
     output.uv = TRANSFORM_TEX(input.texcoord, _BaseMap);
     output.normalWS = normalInput.normalWS;
@@ -108,7 +112,7 @@ float4 frag(Varyings input) : SV_Target
     inputData.positionWS = input.positionWS;
     inputData.normalWS = normalWS;
     inputData.viewDirectionWS = viewDirWS;
-#if defined(_MAIN_LIGHT_SHADOWS) && !defined(_RECEIVE_SHADOWS_OFF)
+#if defined(_MAIN_LIGHT_SHADOWS) || defined(_MAIN_LIGHT_SHADOWS_CASCADE) || defined(_MAIN_LIGHT_SHADOWS_SCREEN) && !defined(_RECEIVE_SHADOWS_OFF)
     inputData.shadowCoord = TransformWorldToShadowCoord(input.positionWS);
 #else
     inputData.shadowCoord = float4(0, 0, 0, 0);
@@ -118,6 +122,39 @@ float4 frag(Varyings input) : SV_Target
     inputData.bakedGI = SAMPLE_GI(input.lightmapUV, input.vertexSH, normalWS);
 
     float4 color = UniversalFragmentPBR(inputData, surfaceData);
+
+#if defined(_FUR_SPECULAR)
+    // Use abs(f) to avoid warning messages that f should not be negative in pow(f, e).
+    SurfaceOutputFur s = (SurfaceOutputFur)0;
+    s.Albedo = abs(SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, furUv).rgb * _BaseColor.rgb);
+    s.MedulaScatter = abs(_MedulaScatter);
+    s.MedulaAbsorb = abs(_MedulaAbsorb);
+    s.Normal = input.tangentWS;
+    s.VNormal = normalWS;
+    s.Alpha = 1.0;
+    // Convert smoothness to roughness, (1 - smoothness) is perceptual roughness.
+    s.Roughness = (1.0 - _Smoothness) * (1.0 - _Smoothness);
+    s.Emission = half3(0.0, 0.0, 0.0);
+    s.Specular = 0.1;
+    s.Layer = input.layer;
+    s.Kappa = (1.0 - _Kappa / 2.0);
+
+    color.rgb += (GetMainLight().color.rgb * FurBSDFYan(s, GetMainLight().direction, viewDirWS, normalWS, 1.0, _Backlit, _Area));
+
+    // Too slow to calculate for all additional lights, you can enable it if needed.
+    /*
+    #ifdef _ADDITIONAL_LIGHTS
+        int additionalLightsCount = GetAdditionalLightsCount();
+        for (int i = 0; i < additionalLightsCount; ++i)
+        {
+            int index = GetPerObjectLightIndex(i);
+            Light light = GetAdditionalPerObjectLight(index, input.positionWS);
+            color.rgb += (light.color.rgb * FurBSDFYan(s, light.direction, viewDirWS, normalWS, 1.0, _Backlit, _Area));
+        }
+    #endif
+    */
+
+#endif
 
     ApplyRimLight(color.rgb, input.positionWS, viewDirWS, normalWS);
     color.rgb += _AmbientColor;
