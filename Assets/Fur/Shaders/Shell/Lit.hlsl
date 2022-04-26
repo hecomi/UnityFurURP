@@ -140,11 +140,7 @@ float4 frag(Varyings input) : SV_Target
     inputData.vertexLighting = input.fogFactorAndVertexLight.yzw;
     inputData.bakedGI = SAMPLE_GI(input.lightmapUV, input.vertexSH, normalWS);
 
-    Light mainLight = GetMainLight(TransformWorldToShadowCoord(input.positionWS));
-    float shadow = mainLight.distanceAttenuation * mainLight.shadowAttenuation;
     float4 color = UniversalFragmentPBR(inputData, surfaceData);
-
-    color.rgb *= shadow;
     ApplyRimLight(color.rgb, input.positionWS, viewDirWS, normalWS);
     color.rgb += _AmbientColor;
     color.rgb = clamp(MixFog(color.rgb, inputData.fogCoord), 0, 1);
