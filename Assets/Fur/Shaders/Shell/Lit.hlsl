@@ -50,7 +50,7 @@ void AppendShellVertex(inout TriangleStream<Varyings> stream, Attributes input, 
     float3 move = moveFactor * _BaseMove.xyz;
     float3 shellDir = SafeNormalize(normalInput.normalWS + move + windMove);
     float3 viewDirWS = GetCameraPositionWS() - vertexInput.positionWS;
-    float FurLength = SAMPLE_TEXTURE2D_LOD(_FurLengthMap, sampler_FurLengthMap, input.texcoord / _BaseMap_ST.xy * _FurScale, 0).x;
+    float FurLength = SAMPLE_TEXTURE2D_LOD(_FurLengthMap, sampler_FurLengthMap, input.texcoord / _BaseMap_ST.xy, 0).x;
     
     output.positionWS = vertexInput.positionWS + shellDir * (_ShellStep * index * FurLength * _FurLengthIntensity);
     output.positionCS = TransformWorldToHClip(output.positionWS);
