@@ -126,7 +126,7 @@ float4 frag(Varyings input) : SV_Target
 #if defined(_FUR_SPECULAR)
     // Use abs(f) to avoid warning messages that f should not be negative in pow(f, e).
     SurfaceOutputFur s = (SurfaceOutputFur)0;
-    s.Albedo = abs(SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, furUv).rgb * _BaseColor.rgb);
+    s.Albedo = abs(SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv).rgb * _BaseColor.rgb);
     s.MedulaScatter = abs(_MedulaScatter);
     s.MedulaAbsorb = abs(_MedulaAbsorb);
     s.Normal = input.tangentWS;
