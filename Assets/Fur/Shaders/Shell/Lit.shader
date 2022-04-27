@@ -9,6 +9,8 @@ Properties
     _BaseMap("Albedo", 2D) = "white" {}
     [Gamma] _Metallic("Metallic", Range(0.0, 1.0)) = 0.5
     _Smoothness("Smoothness", Range(0.0, 1.0)) = 0.5
+    
+    [Header(Reduce Flickering)][Space]
     [ToggleOff] _SpecularHighlights("Specular Highlights", Float) = 0.0
 
     [Header(Fur)][Space]
@@ -31,9 +33,9 @@ Properties
     _RimLightPower("Rim Light Power", Range(1.0, 20.0)) = 6.0
     _RimLightIntensity("Rim Light Intensity", Range(0.0, 1.0)) = 0.5
 
-    [Header(Marschner Specular)][Space]
+    [Header(Marschner Scatter)][Space]
     [Toggle(_FUR_SPECULAR)] _FurSpecular("Enable", Float) = 0
-    _Backlit("Backlit", Range(0.0, 1.0)) = 0.5
+    _Backlit("Back Lit", Range(0.0, 1.0)) = 0.5
     _Area("Lit Area", Range(0.01, 1.0)) = 0.1
     _MedulaScatter("Fur Scatter", Range(0.01, 1.0)) = 1.0
     _MedulaAbsorb("Fur Absorb", Range(0.01, 1.0)) = 0.1
@@ -78,7 +80,6 @@ SubShader
         #pragma multi_compile_fragment _ _LIGHT_LAYERS
         //#pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
         #pragma shader_feature _ _SPECULARHIGHLIGHTS_OFF
-        #pragma shader_feature_local_fragment _ENVIRONMENTREFLECTIONS_OFF
 
         #pragma multi_compile_fragment _ _FUR_SPECULAR
 
