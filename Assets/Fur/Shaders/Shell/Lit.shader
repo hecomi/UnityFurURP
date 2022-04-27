@@ -78,7 +78,7 @@ SubShader
         #pragma multi_compile _ _SHADOWS_SOFT
         #pragma multi_compile _ _MIXED_LIGHTING_SUBTRACTIVE
         #pragma multi_compile_fragment _ _LIGHT_LAYERS
-        //#pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
+        #pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
         #pragma shader_feature _ _SPECULARHIGHLIGHTS_OFF
 
         #pragma multi_compile_fragment _ _FUR_SPECULAR
