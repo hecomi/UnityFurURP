@@ -74,7 +74,7 @@ SubShader
         ZWrite On
 
         HLSLPROGRAM
-        // URP §Œ•≠©`•Ô©`•…
+        // URP „ÅÆ„Ç≠„Éº„ÉØ„Éº„Éâ
 #if (UNITY_VERSION >= 202111)
         #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
         #pragma multi_compile_fragment _ _LIGHT_LAYERS
@@ -93,7 +93,7 @@ SubShader
         #pragma multi_compile_fragment _ _FUR_SPECULAR
         #pragma multi_compile _ _GEOM_INSTANCING
 
-        // Unity §Œ•≠©`•Ô©`•…
+        // Unity „ÅÆ„Ç≠„Éº„ÉØ„Éº„Éâ
         #pragma multi_compile _ DIRLIGHTMAP_COMBINED
         #pragma multi_compile _ LIGHTMAP_ON
         #pragma multi_compile_fog
@@ -187,7 +187,7 @@ SubShader
         ZWrite On
 
         HLSLPROGRAM
-        // URP §Œ•≠©`•Ô©`•…
+        // URP „ÅÆ„Ç≠„Éº„ÉØ„Éº„Éâ
 #if (UNITY_VERSION >= 202111)
         #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
         #pragma multi_compile_fragment _ _LIGHT_LAYERS
@@ -205,7 +205,7 @@ SubShader
 
         #pragma multi_compile_fragment _ _FUR_SPECULAR
 
-        // Unity §Œ•≠©`•Ô©`•…
+        // Unity „ÅÆ„Ç≠„Éº„ÉØ„Éº„Éâ
         #pragma multi_compile _ DIRLIGHTMAP_COMBINED
         #pragma multi_compile _ LIGHTMAP_ON
         #pragma multi_compile_fog
