@@ -25,6 +25,8 @@ TEXTURE2D(_FurLengthMap);
 SAMPLER(sampler_FurLengthMap);
 float _FurLengthIntensity;
 
+float _TotalShellStep;
+
 float _Backlit;
 float _Area;
 float _MedulaScatter;

@@ -11,24 +11,55 @@ struct Attributes
     float3 normalOS : NORMAL;
     float4 tangentOS : TANGENT;
     float2 uv : TEXCOORD0;
+    UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
-struct Varyings
+struct v2g
+{
+    float4 positionOS : POSITION;
+    float3 normalOS : NORMAL;
+    float4 tangentOS : TANGENT;
+    float2 uv : TEXCOORD0;
+    UNITY_VERTEX_INPUT_INSTANCE_ID
+};
+
+struct g2f
 {
     float4 vertex : SV_POSITION;
     float2 uv : TEXCOORD0;
     float  fogCoord : TEXCOORD1;
     float  layer : TEXCOORD2;
+    UNITY_VERTEX_INPUT_INSTANCE_ID
+    UNITY_VERTEX_OUTPUT_STEREO
 };
 
 Attributes vert(Attributes input)
 {
-    return input;
+    v2g output = (v2g)0;
+    // setup the instanced id
+    UNITY_SETUP_INSTANCE_ID(input);
+    // set all values in the "v2g output" to 0.0
+    // This is the URP version of UNITY_INITIALIZE_OUTPUT()
+    ZERO_INITIALIZE(v2g, output);
+    // copy instance id in the "Attributes input" to the "v2g output"
+    UNITY_TRANSFER_INSTANCE_ID(input, output);
+
+    output.positionOS = input.positionOS;
+    output.normalOS = input.normalOS;
+    output.tangentOS = input.tangentOS;
+    output.uv = input.uv;
+    return output;
 }
 
-void AppendShellVertex(inout TriangleStream<Varyings> stream, Attributes input, int index)
+void AppendShellVertex(inout TriangleStream<g2f> stream, v2g input, int index)
 {
-    Varyings output = (Varyings)0;
+    g2f output = (g2f)0;
+    UNITY_SETUP_INSTANCE_ID(input);
+    // set all values in the g2f output to 0.0
+    ZERO_INITIALIZE(g2f, output);
+
+    UNITY_TRANSFER_INSTANCE_ID(input, output);
+    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
     VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
     VertexNormalInputs normalInput = GetVertexNormalInputs(input.normalOS, input.tangentOS);
@@ -59,7 +90,7 @@ void AppendShellVertex(inout TriangleStream<Varyings> stream, Attributes input, 
 }
 
 [maxvertexcount(128)]
-void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
+void geom(triangle v2g input[3], inout TriangleStream<g2f> stream)
 {
     [loop] for (float i = 0; i < _ShellAmount; ++i)
     {
@@ -71,7 +102,7 @@ void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
     }
 }
 
-float4 frag(Varyings input) : SV_Target
+float4 frag(g2f input) : SV_Target
 {
     float4 furColor = SAMPLE_TEXTURE2D(_FurMap, sampler_FurMap, input.uv * _FurScale);
     float alpha = furColor.r * (1.0 - input.layer);
