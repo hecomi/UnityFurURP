@@ -51,14 +51,20 @@ SubShader
 
         HLSLPROGRAM
         // URP のキーワード
+#if (UNITY_VERSION >= 202111)
+        #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+#else 
         #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
         #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
+#endif
         #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
         #pragma multi_compile _ _ADDITIONAL_LIGHT_SHADOWS
         #pragma multi_compile _ _SHADOWS_SOFT
         #pragma multi_compile _ _MIXED_LIGHTING_SUBTRACTIVE
 
         // Unity のキーワード
+        #pragma multi_compile_instancing
+        #pragma multi_compile _ DOTS_INSTANCING_ON
         #pragma multi_compile _ DIRLIGHTMAP_COMBINED
         #pragma multi_compile _ LIGHTMAP_ON
         #pragma multi_compile_fog

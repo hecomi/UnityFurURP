@@ -6,6 +6,7 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #include "./Param.hlsl"
 #include "../Common/Common.hlsl"
+#include "HLSLSupport.cginc"
 
 struct _Attributes
 {
@@ -14,6 +15,7 @@ struct _Attributes
     float2 texcoord : TEXCOORD0;
     float2 lightmapUV : TEXCOORD1;
     uint id : SV_VertexID;
+    UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
 struct Attributes
@@ -23,6 +25,8 @@ struct Attributes
     float2 texcoord : TEXCOORD0;
     float2 lightmapUV : TEXCOORD1;
     uint id : TEXCOORD2;
+    UNITY_VERTEX_INPUT_INSTANCE_ID
+    UNITY_VERTEX_OUTPUT_STEREO
 };
 
 struct Varyings
@@ -34,19 +38,31 @@ struct Varyings
     DECLARE_LIGHTMAP_OR_SH(lightmapUV, vertexSH, 4);
     float4 fogFactorAndVertexLight : TEXCOORD5; // x: fogFactor, yzw: vertex light
     float factor : TEXCOORD6;
+    UNITY_VERTEX_OUTPUT_STEREO
 };
 
 Attributes vert(_Attributes input)
 {
+    Attributes output;
+    UNITY_INITIALIZE_OUTPUT(Attributes, output);
+    //UNITY_SETUP_INSTANCE_ID(input); //Insert
+    //UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output); //Insert
+    UNITY_TRANSFER_INSTANCE_ID(input, output);
     FurMoverData data = _Buffer[input.id];
+    //UNITY_INITIALIZE_OUTPUT(Attributes, output); //Insert
+    output.positionOS = input.positionOS;
+    output.normalOS = input.normalOS;
+    output.texcoord = input.texcoord;
+    output.lightmapUV = input.lightmapUV;
+    output.id = input.id;
 
     float time = _Time.y;
     if (abs(time - data.time) > 1e-3)
     {
-        float3 targetPosWS = TransformObjectToWorld(input.positionOS.xyz);
+        float3 targetPosWS = TransformObjectToWorld(output.positionOS.xyz);
         float3 dPosWS = targetPosWS - data.posWS;
         float3 forceWS = _Spring * dPosWS - data.velocityWS * _Damper + float3(0.0, _Gravity, 0.0);
-        float3 normalWS = TransformObjectToWorldNormal(input.normalOS, true);
+        float3 normalWS = TransformObjectToWorldNormal(output.normalOS, true);
         float dt = 1.0 / 60;
         data.velocityWS += forceWS * dt;
         data.posWS += data.velocityWS * dt;
@@ -54,10 +70,10 @@ Attributes vert(_Attributes input)
         float move = length(data.dPosWS);
         data.dPosWS = min(move, 1.0) / max(move, 0.01) * data.dPosWS;
         data.time = time;
-        _Buffer[input.id] = data;
+        _Buffer[output.id] = data;
     }
 
-    return (Attributes)input;
+    return output;
 }
 
 void AppendVertex(
@@ -66,9 +82,13 @@ void AppendVertex(
     float3 normalOS, 
     float2 uv, 
     float2 lightmapUV,
-    float factor)
+    float factor,
+    Attributes input0)
 {
-    Varyings output = (Varyings)0;
+    Varyings output;
+    //UNITY_INITIALIZE_OUTPUT(Varyings, output);
+    //UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+    UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(input0, output);
 
     VertexPositionInputs vertexInput = GetVertexPositionInputs(posOS);
     output.positionCS = vertexInput.positionCS;
@@ -90,6 +110,16 @@ void AppendVertex(
 [maxvertexcount(45)]
 void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
 {
+    UNITY_SETUP_INSTANCE_ID(input[0]);
+    //UNITY_SETUP_INSTANCE_ID(input[1]);
+    //UNITY_SETUP_INSTANCE_ID(input[2]);
+    //UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input[0])
+    //UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input[1])
+    //UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input[2])
+    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(input[0]);
+    //UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(input[1]);
+    //UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(input[2]);
+    //UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
     uint id0 = input[0].id;
     uint id1 = input[1].id;
     uint id2 = input[2].id;
@@ -175,14 +205,14 @@ void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
         float2 nextLightmapUv1 = prevUv1 + lightmapUvInterp1 * delta;
         float2 nextLightmapUv2 = prevUv2 + lightmapUvInterp2 * delta;
 
-        AppendVertex(stream, nextPos0OS, nextNormal0OS, nextUv0, nextLightmapUv0, nextFactor);
-        AppendVertex(stream, prevPos0OS, prevNormal0OS, prevUv0, prevLightmapUv0, prevFactor);
-        AppendVertex(stream, nextPos1OS, nextNormal1OS, nextUv1, nextLightmapUv1, nextFactor);
-        AppendVertex(stream, prevPos1OS, prevNormal1OS, prevUv1, prevLightmapUv1, prevFactor);
-        AppendVertex(stream, nextPos2OS, nextNormal2OS, nextUv2, nextLightmapUv2, nextFactor);
-        AppendVertex(stream, prevPos2OS, prevNormal2OS, prevUv2, prevLightmapUv2, prevFactor);
-        AppendVertex(stream, nextPos0OS, nextNormal0OS, nextUv0, nextLightmapUv0, nextFactor);
-        AppendVertex(stream, prevPos0OS, prevNormal0OS, prevUv0, prevLightmapUv0, prevFactor);
+        AppendVertex(stream, nextPos0OS, nextNormal0OS, nextUv0, nextLightmapUv0, nextFactor, input[0]);
+        AppendVertex(stream, prevPos0OS, prevNormal0OS, prevUv0, prevLightmapUv0, prevFactor, input[0]);
+        AppendVertex(stream, nextPos1OS, nextNormal1OS, nextUv1, nextLightmapUv1, nextFactor, input[0]);
+        AppendVertex(stream, prevPos1OS, prevNormal1OS, prevUv1, prevLightmapUv1, prevFactor, input[0]);
+        AppendVertex(stream, nextPos2OS, nextNormal2OS, nextUv2, nextLightmapUv2, nextFactor, input[0]);
+        AppendVertex(stream, prevPos2OS, prevNormal2OS, prevUv2, prevLightmapUv2, prevFactor, input[0]);
+        AppendVertex(stream, nextPos0OS, nextNormal0OS, nextUv0, nextLightmapUv0, nextFactor, input[0]);
+        AppendVertex(stream, prevPos0OS, prevNormal0OS, prevUv0, prevLightmapUv0, prevFactor, input[0]);
 
         prevFactor = nextFactor;
 
@@ -209,16 +239,18 @@ void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
 
     float3 topNormalOS = SafeNormalize(topMovedPosOS - prevCenterPosOS);
     topNormalOS = SafeNormalize(lerp(faceNormalOS, topNormalOS, _NormalFactor));
-    AppendVertex(stream, prevPos0OS, prevNormal0OS, prevUv0, prevLightmapUv0, prevFactor);
-    AppendVertex(stream, prevPos1OS, prevNormal1OS, prevUv1, prevLightmapUv1, prevFactor);
-    AppendVertex(stream, topMovedPosOS, topNormalOS, topUv, topLightmapUv, 1.0);
-    AppendVertex(stream, prevPos2OS, prevNormal2OS, prevUv2, prevLightmapUv2, prevFactor);
-    AppendVertex(stream, prevPos0OS, prevNormal0OS, prevUv0, prevLightmapUv0, prevFactor);
+    AppendVertex(stream, prevPos0OS, prevNormal0OS, prevUv0, prevLightmapUv0, prevFactor, input[0]);
+    AppendVertex(stream, prevPos1OS, prevNormal1OS, prevUv1, prevLightmapUv1, prevFactor, input[0]);
+    AppendVertex(stream, topMovedPosOS, topNormalOS, topUv, topLightmapUv, 1.0, input[0]);
+    AppendVertex(stream, prevPos2OS, prevNormal2OS, prevUv2, prevLightmapUv2, prevFactor, input[0]);
+    AppendVertex(stream, prevPos0OS, prevNormal0OS, prevUv0, prevLightmapUv0, prevFactor, input[0]);
     stream.RestartStrip();
 }
 
 float4 frag(Varyings input) : SV_Target
 {
+    //UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+    //UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(input, output);
     SurfaceData surfaceData = (SurfaceData)0;
     InitializeStandardLitSurfaceData(input.uv, surfaceData);
     surfaceData.occlusion = lerp(sqrt(abs(1.0 - _Occlusion)), 1.0, input.factor);
@@ -228,7 +260,7 @@ float4 frag(Varyings input) : SV_Target
     inputData.positionWS = input.positionWS;
     inputData.normalWS = SafeNormalize(input.normalWS);
     inputData.viewDirectionWS = SafeNormalize(GetCameraPositionWS() - input.positionWS);
-#if defined(_MAIN_LIGHT_SHADOWS) && !defined(_RECEIVE_SHADOWS_OFF)
+#if (defined(_MAIN_LIGHT_SHADOWS) || defined(_MAIN_LIGHT_SHADOWS_CASCADE) || defined(_MAIN_LIGHT_SHADOWS_SCREEN)) && !defined(_RECEIVE_SHADOWS_OFF)
     inputData.shadowCoord = TransformWorldToShadowCoord(input.positionWS);
 #else
     inputData.shadowCoord = float4(0, 0, 0, 0);
@@ -241,9 +273,9 @@ float4 frag(Varyings input) : SV_Target
     float4 color = UniversalFragmentPBR(inputData, surfaceData);
     ApplyRimLight(color.rgb, inputData.positionWS, inputData.viewDirectionWS, inputData.normalWS);
     color.rgb += _AmbientColor.rgb;
-    color.rgb = MixFog(color.rgb, inputData.fogCoord);
+    color.rgb = clamp(MixFog(color.rgb, inputData.fogCoord), 0, 1);
 #else
-    float4 color = float4(inputData.normalWS, 1.0);
+    float4 color = clamp(float4(inputData.normalWS, 1.0), 0, 1);
 #endif
 
     return color;

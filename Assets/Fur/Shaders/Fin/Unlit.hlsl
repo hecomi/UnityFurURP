@@ -4,12 +4,23 @@
 #include "Packages/com.unity.render-pipelines.universal/Shaders/UnlitInput.hlsl"
 #include "./Param.hlsl"
 #include "../Common/Common.hlsl"
+#include "HLSLSupport.cginc"
+
+struct _Attributes
+{
+    float4 positionOS : POSITION;
+    float3 normalOS : NORMAL;
+    float2 uv : TEXCOORD0;
+    UNITY_VERTEX_INPUT_INSTANCE_ID
+};
 
 struct Attributes
 {
     float4 positionOS : POSITION;
     float3 normalOS : NORMAL;
     float2 uv : TEXCOORD0;
+    UNITY_VERTEX_INPUT_INSTANCE_ID
+    UNITY_VERTEX_OUTPUT_STEREO
 };
 
 struct Varyings
@@ -18,21 +29,29 @@ struct Varyings
     float2 uv : TEXCOORD0;
     float fogCoord : TEXCOORD1;
     float2 finUv : TEXCOORD2;
+    UNITY_VERTEX_OUTPUT_STEREO
 };
 
-Attributes vert(Attributes input)
+Attributes vert(_Attributes input)
 {
-    return input;
+    Attributes output;
+    UNITY_INITIALIZE_OUTPUT(Attributes, output);
+    UNITY_TRANSFER_INSTANCE_ID(input, output);
+    output.positionOS = input.positionOS;
+    output.normalOS = input.normalOS;
+    output.uv = input.uv;
+    return output;
 }
 
 void AppendFinVertex(
     inout TriangleStream<Varyings> stream, 
     float2 uv, 
     float3 posOS, 
-    float2 finUv)
+    float2 finUv,
+    Attributes input0)
 {
     Varyings output;
-
+    UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(input0, output);
     output.vertex = TransformObjectToHClip(posOS);
     output.uv = uv;
     output.fogCoord = ComputeFogFactor(output.vertex.z);
@@ -46,7 +65,8 @@ void AppendFinVertices(
     Attributes input0,
     Attributes input1,
     Attributes input2,
-    float3 normalOS)
+    float3 normalOS,
+    Attributes inputvr)
 {
     float3 posOS0 = input0.positionOS.xyz;
     float3 lineOS01 = input1.positionOS.xyz - posOS0;
@@ -58,8 +78,8 @@ void AppendFinVertices(
     float uvOffset = length(uv0);
     float uvXScale = length(uv0 - uv12) * _Density;
 
-    AppendFinVertex(stream, uv0, posOS0, float2(uvOffset, 0.0));
-    AppendFinVertex(stream, uv12, posOS3, float2(uvOffset + uvXScale, 0.0));
+    AppendFinVertex(stream, uv0, posOS0, float2(uvOffset, 0.0), inputvr);
+    AppendFinVertex(stream, uv12, posOS3, float2(uvOffset + uvXScale, 0.0), inputvr);
 
     float3 normalWS = TransformObjectToWorldNormal(normalOS);
     float3 posWS = TransformObjectToWorld(posOS0);
@@ -76,8 +96,8 @@ void AppendFinVertices(
         float3 moveOS = TransformWorldToObjectDir(moveWS, false);
         posOS0 += moveOS;
         posOS3 += moveOS;
-        AppendFinVertex(stream, uv0, posOS0, float2(uvOffset, finFactor));
-        AppendFinVertex(stream, uv12, posOS3, float2(uvOffset + uvXScale, finFactor));
+        AppendFinVertex(stream, uv0, posOS0, float2(uvOffset, finFactor), inputvr);
+        AppendFinVertex(stream, uv12, posOS3, float2(uvOffset + uvXScale, finFactor), inputvr);
     }
     stream.RestartStrip();
 }
@@ -85,10 +105,13 @@ void AppendFinVertices(
 [maxvertexcount(75)]
 void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
 {
+    UNITY_SETUP_INSTANCE_ID(input[0]);
+    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(input[0]);
 #ifdef DRAW_ORIG_POLYGON
     for (int i = 0; i < 3; ++i)
     {
         Varyings output;
+        UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(input[0], output);
         output.vertex = TransformObjectToHClip(input[i].positionOS.xyz);
         output.uv = TRANSFORM_TEX(input[i].uv, _BaseMap);
         output.fogCoord = ComputeFogFactor(output.vertex.z);
@@ -110,10 +133,10 @@ void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
     normalOS += rand3(input[0].uv) * _RandomDirection;
     normalOS = normalize(normalOS);
 
-    AppendFinVertices(stream, input[0], input[1], input[2], normalOS);
+    AppendFinVertices(stream, input[0], input[1], input[2], normalOS, input[0]);
 #ifdef APPEND_MORE_FINS
-    AppendFinVertices(stream, input[2], input[0], input[1], normalOS);
-    AppendFinVertices(stream, input[1], input[2], input[0], normalOS);
+    AppendFinVertices(stream, input[2], input[0], input[1], normalOS, input[0]);
+    AppendFinVertices(stream, input[1], input[2], input[0], normalOS, input[0]);
 #endif
 }
 
@@ -126,7 +149,7 @@ float4 frag(Varyings input) : SV_Target
     color *= _BaseColor;
     color *= furColor;
     color.rgb *= lerp(1.0 - _Occlusion, 1.0, max(input.finUv.y, 0.0));
-    color.rgb = MixFog(color.rgb, input.fogCoord);
+    color.rgb = clamp(MixFog(color.rgb, input.fogCoord), 0, 1);
     return color;
 }
 

@@ -4,12 +4,22 @@
 #include "Packages/com.unity.render-pipelines.universal/Shaders/UnlitInput.hlsl"
 #include "./Param.hlsl"
 #include "../Common/Common.hlsl"
+#include "HLSLSupport.cginc"
 
-struct Attributes
+struct _Attributes
 {
     float4 positionOS : POSITION;
     float3 normalOS : NORMAL;
     float2 uv : TEXCOORD0;
+    UNITY_VERTEX_INPUT_INSTANCE_ID
+};
+
+struct Attributes {
+    float4 positionOS : POSITION;
+    float3 normalOS : NORMAL;
+    float2 uv : TEXCOORD0;
+    UNITY_VERTEX_INPUT_INSTANCE_ID
+    UNITY_VERTEX_OUTPUT_STEREO
 };
 
 struct Varyings
@@ -18,16 +28,29 @@ struct Varyings
     float2 uv : TEXCOORD0;
     float fogCoord : TEXCOORD1;
     float factor : TEXCOORD2;
+    UNITY_VERTEX_OUTPUT_STEREO
 };
 
-Attributes vert(Attributes input)
+Attributes vert(_Attributes input)
 {
-    return input;
+    Attributes output;
+    UNITY_INITIALIZE_OUTPUT(Attributes, output);
+    //UNITY_SETUP_INSTANCE_ID(input); //Insert
+    //UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output); //Insert
+    UNITY_TRANSFER_INSTANCE_ID(input, output);
+    output.positionOS = input.positionOS;
+    output.normalOS = input.normalOS;
+    output.uv = input.uv;
+    return output;
 }
 
-void AppendVertex(inout TriangleStream<Varyings> stream, float3 posOS, float3 normalWS, float2 uv, float factor)
+void AppendVertex(inout TriangleStream<Varyings> stream, float3 posOS, float3 normalWS, float2 uv, float factor, Attributes input0)
 {
     Varyings output;
+    //UNITY_INITIALIZE_OUTPUT(Varyings, output);
+    //UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+    UNITY_TRANSFER_INSTANCE_ID(input, output);
+    UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(input0, output);
 #ifdef SHADOW_CASTER_PASS
     float3 posWS = TransformObjectToWorld(posOS);
     output.vertex = GetShadowPositionHClip(posWS, normalWS);
@@ -43,6 +66,16 @@ void AppendVertex(inout TriangleStream<Varyings> stream, float3 posOS, float3 no
 [maxvertexcount(53)]
 void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
 {
+    //UNITY_SETUP_INSTANCE_ID(input[0]);
+    //UNITY_SETUP_INSTANCE_ID(input[1]);
+    //UNITY_SETUP_INSTANCE_ID(input[2]);
+    //UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input[0])
+    //UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input[1])
+    //UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input[2])
+    //UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(input[0]);
+    //UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(input[1]);
+    //UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(input[2]);
+    //UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
     float3 startPos0OS = input[0].positionOS.xyz;
     float3 startPos1OS = input[1].positionOS.xyz;
     float3 startPos2OS = input[2].positionOS.xyz;
@@ -95,14 +128,14 @@ void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
         float2 nextUv1 = prevUv1 + uvInterp1 * delta;
         float2 nextUv2 = prevUv2 + uvInterp2 * delta;
 
-        AppendVertex(stream, nextPos0OS, faceNormalWS, nextUv0, nextFactor);
-        AppendVertex(stream, prevPos0OS, faceNormalWS, prevUv0, prevFactor);
-        AppendVertex(stream, nextPos1OS, faceNormalWS, nextUv1, nextFactor);
-        AppendVertex(stream, prevPos1OS, faceNormalWS, prevUv1, prevFactor);
-        AppendVertex(stream, nextPos2OS, faceNormalWS, nextUv2, nextFactor);
-        AppendVertex(stream, prevPos2OS, faceNormalWS, prevUv2, prevFactor);
-        AppendVertex(stream, nextPos0OS, faceNormalWS, nextUv0, nextFactor);
-        AppendVertex(stream, prevPos0OS, faceNormalWS, prevUv0, prevFactor);
+        AppendVertex(stream, nextPos0OS, faceNormalWS, nextUv0, nextFactor, input[0]);
+        AppendVertex(stream, prevPos0OS, faceNormalWS, prevUv0, prevFactor, input[0]);
+        AppendVertex(stream, nextPos1OS, faceNormalWS, nextUv1, nextFactor, input[0]);
+        AppendVertex(stream, prevPos1OS, faceNormalWS, prevUv1, prevFactor, input[0]);
+        AppendVertex(stream, nextPos2OS, faceNormalWS, nextUv2, nextFactor, input[0]);
+        AppendVertex(stream, prevPos2OS, faceNormalWS, prevUv2, prevFactor, input[0]);
+        AppendVertex(stream, nextPos0OS, faceNormalWS, nextUv0, nextFactor, input[0]);
+        AppendVertex(stream, prevPos0OS, faceNormalWS, prevUv0, prevFactor, input[0]);
 
         prevFactor = nextFactor;
 
@@ -117,11 +150,11 @@ void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
         stream.RestartStrip();
     }
 
-    AppendVertex(stream, prevPos0OS, faceNormalWS, prevUv0, prevFactor);
-    AppendVertex(stream, prevPos1OS, faceNormalWS, prevUv1, prevFactor);
-    AppendVertex(stream, topMovedPosOS, faceNormalWS, topUv, 1.0);
-    AppendVertex(stream, prevPos2OS, faceNormalWS, prevUv2, prevFactor);
-    AppendVertex(stream, prevPos0OS, faceNormalWS, prevUv0, prevFactor);
+    AppendVertex(stream, prevPos0OS, faceNormalWS, prevUv0, prevFactor, input[0]);
+    AppendVertex(stream, prevPos1OS, faceNormalWS, prevUv1, prevFactor, input[0]);
+    AppendVertex(stream, topMovedPosOS, faceNormalWS, topUv, 1.0, input[0]);
+    AppendVertex(stream, prevPos2OS, faceNormalWS, prevUv2, prevFactor, input[0]);
+    AppendVertex(stream, prevPos0OS, faceNormalWS, prevUv0, prevFactor, input[0]);
     stream.RestartStrip();
 }
 
@@ -130,6 +163,8 @@ void frag(
     out float4 outColor : SV_Target, 
     out float outDepth : SV_Depth)
 {
+    UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+    //UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(input, output);
     outColor = outDepth = input.vertex.z / input.vertex.w;
 }
 

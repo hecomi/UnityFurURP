@@ -1,6 +1,7 @@
 #ifndef FUR_FIN_UNLIT_TESSELLATION_HLSL
 #define FUR_FIN_UNLIT_TESSELLATION_HLSL
 
+#include "HLSLSupport.cginc"
 #include "Packages/com.unity.render-pipelines.universal/Shaders/UnlitInput.hlsl"
 #include "./Param.hlsl"
 #include "../Common/Common.hlsl"
@@ -28,6 +29,7 @@ struct HsConstantOutput
 [outputcontrolpoints(3)]
 Attributes hull(InputPatch<Attributes, 3> input, uint id : SV_OutputControlPointID)
 {
+    UNITY_SETUP_INSTANCE_ID(input[id]);
     return input[id];
 }
 
@@ -78,7 +80,9 @@ Attributes domain(
     const OutputPatch<Attributes, 3> i,
     float3 bary : SV_DomainLocation)
 {
-    Attributes o = (Attributes)0;
+    Attributes o;
+    UNITY_INITIALIZE_OUTPUT(Attributes, o);
+    UNITY_TRANSFER_INSTANCE_ID(i[0], o);
 
     float fU = bary.x;
     float fV = bary.y;

@@ -4,12 +4,23 @@
 #include "Packages/com.unity.render-pipelines.universal/Shaders/UnlitInput.hlsl"
 #include "./Param.hlsl"
 #include "../Common/Common.hlsl"
+#include "HLSLSupport.cginc"
+
+struct _Attributes
+{
+    float4 positionOS : POSITION;
+    float3 normalOS : NORMAL;
+    float2 uv : TEXCOORD0;
+    UNITY_VERTEX_INPUT_INSTANCE_ID
+};
 
 struct Attributes
 {
     float4 positionOS : POSITION;
     float3 normalOS : NORMAL;
     float2 uv : TEXCOORD0;
+    UNITY_VERTEX_INPUT_INSTANCE_ID
+    UNITY_VERTEX_OUTPUT_STEREO
 };
 
 struct Varyings
@@ -18,16 +29,24 @@ struct Varyings
     float2 uv : TEXCOORD0;
     float fogCoord : TEXCOORD1;
     float factor : TEXCOORD2;
+    UNITY_VERTEX_OUTPUT_STEREO
 };
 
-Attributes vert(Attributes input)
+Attributes vert(_Attributes input)
 {
-    return input;
+    Attributes output;
+    UNITY_INITIALIZE_OUTPUT(Attributes, output);
+    UNITY_TRANSFER_INSTANCE_ID(input, output);
+    output.positionOS = input.positionOS;
+    output.normalOS = input.normalOS;
+    output.uv = input.uv;
+    return output;
 }
 
-void AppendVertex(inout TriangleStream<Varyings> stream, float3 posOS, float2 uv, float factor)
+void AppendVertex(inout TriangleStream<Varyings> stream, float3 posOS, float2 uv, float factor, Attributes input0)
 {
     Varyings output;
+    UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(input0, output);
     output.vertex = TransformObjectToHClip(posOS);
     output.uv = TRANSFORM_TEX(uv, _BaseMap);
     output.fogCoord = ComputeFogFactor(output.vertex.z);
@@ -38,6 +57,8 @@ void AppendVertex(inout TriangleStream<Varyings> stream, float3 posOS, float2 uv
 [maxvertexcount(53)]
 void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
 {
+    UNITY_SETUP_INSTANCE_ID(input[0]);
+    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(input[0]);
     float3 startPos0OS = input[0].positionOS.xyz;
     float3 startPos1OS = input[1].positionOS.xyz;
     float3 startPos2OS = input[2].positionOS.xyz;
@@ -90,14 +111,14 @@ void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
         float2 nextUv1 = prevUv1 + uvInterp1 * delta;
         float2 nextUv2 = prevUv2 + uvInterp2 * delta;
 
-        AppendVertex(stream, nextPos0OS, nextUv0, nextFactor);
-        AppendVertex(stream, prevPos0OS, prevUv0, prevFactor);
-        AppendVertex(stream, nextPos1OS, nextUv1, nextFactor);
-        AppendVertex(stream, prevPos1OS, prevUv1, prevFactor);
-        AppendVertex(stream, nextPos2OS, nextUv2, nextFactor);
-        AppendVertex(stream, prevPos2OS, prevUv2, prevFactor);
-        AppendVertex(stream, nextPos0OS, nextUv0, nextFactor);
-        AppendVertex(stream, prevPos0OS, prevUv0, prevFactor);
+        AppendVertex(stream, nextPos0OS, nextUv0, nextFactor, input[0]);
+        AppendVertex(stream, prevPos0OS, prevUv0, prevFactor, input[0]);
+        AppendVertex(stream, nextPos1OS, nextUv1, nextFactor, input[0]);
+        AppendVertex(stream, prevPos1OS, prevUv1, prevFactor, input[0]);
+        AppendVertex(stream, nextPos2OS, nextUv2, nextFactor, input[0]);
+        AppendVertex(stream, prevPos2OS, prevUv2, prevFactor, input[0]);
+        AppendVertex(stream, nextPos0OS, nextUv0, nextFactor, input[0]);
+        AppendVertex(stream, prevPos0OS, prevUv0, prevFactor, input[0]);
 
         prevFactor = nextFactor;
 
@@ -112,11 +133,11 @@ void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
         stream.RestartStrip();
     }
 
-    AppendVertex(stream, prevPos0OS, prevUv0, prevFactor);
-    AppendVertex(stream, prevPos1OS, prevUv1, prevFactor);
-    AppendVertex(stream, topMovedPosOS, topUv, 1.0);
-    AppendVertex(stream, prevPos2OS, prevUv2, prevFactor);
-    AppendVertex(stream, prevPos0OS, prevUv0, prevFactor);
+    AppendVertex(stream, prevPos0OS, prevUv0, prevFactor, input[0]);
+    AppendVertex(stream, prevPos1OS, prevUv1, prevFactor, input[0]);
+    AppendVertex(stream, topMovedPosOS, topUv, 1.0, input[0]);
+    AppendVertex(stream, prevPos2OS, prevUv2, prevFactor, input[0]);
+    AppendVertex(stream, prevPos0OS, prevUv0, prevFactor, input[0]);
     stream.RestartStrip();
 }
 
@@ -125,7 +146,7 @@ float4 frag(Varyings input) : SV_Target
     float4 color = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv);
     color *= _BaseColor;
     color *= lerp(1.0 - _Occlusion, 1.0, input.factor);
-    color.rgb = MixFog(color.rgb, input.fogCoord);
+    color.rgb = clamp(MixFog(color.rgb, input.fogCoord), 0, 1);
     return color;
 }
 

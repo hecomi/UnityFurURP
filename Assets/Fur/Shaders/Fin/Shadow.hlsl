@@ -4,12 +4,23 @@
 #include "Packages/com.unity.render-pipelines.universal/Shaders/UnlitInput.hlsl"
 #include "./Param.hlsl"
 #include "../Common/Common.hlsl"
+#include "HLSLSupport.cginc"
+
+struct _Attributes
+{
+    float4 positionOS : POSITION;
+    float3 normalOS : NORMAL;
+    float2 uv : TEXCOORD0;
+    UNITY_VERTEX_INPUT_INSTANCE_ID
+};
 
 struct Attributes
 {
     float4 positionOS : POSITION;
     float3 normalOS : NORMAL;
     float2 uv : TEXCOORD0;
+    UNITY_VERTEX_INPUT_INSTANCE_ID
+    UNITY_VERTEX_OUTPUT_STEREO
 };
 
 struct Varyings
@@ -18,11 +29,20 @@ struct Varyings
     float2 uv : TEXCOORD0;
     float fogCoord : TEXCOORD1;
     float2 finUv : TEXCOORD2;
+    UNITY_VERTEX_OUTPUT_STEREO
 };
 
-Attributes vert(Attributes input)
+Attributes vert(_Attributes input)
 {
-    return input;
+    Attributes output;
+    UNITY_INITIALIZE_OUTPUT(Attributes, output);
+    //UNITY_SETUP_INSTANCE_ID(input); //Insert
+    //UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output); //Insert
+    UNITY_TRANSFER_INSTANCE_ID(input, output);
+    output.positionOS = input.positionOS;
+    output.normalOS = input.normalOS;
+    output.uv = input.uv;
+    return output;
 }
 
 void AppendFinVertex(
@@ -30,9 +50,12 @@ void AppendFinVertex(
     float2 uv, 
     float3 posOS, 
     float3 normalWS,
-    float2 finUv)
+    float2 finUv,
+    Attributes input0)
 {
     Varyings output;
+    UNITY_TRANSFER_INSTANCE_ID(input, output);
+    UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(input0, output);
 
 #ifdef SHADOW_CASTER_PASS
     float3 posWS = TransformObjectToWorld(posOS);
@@ -65,8 +88,8 @@ void AppendFinVertices(
     float uvXScale = length(uv0 - uv12) * _Density;
     float3 normalWS = TransformObjectToWorldNormal(normalOS);
 
-    AppendFinVertex(stream, uv0, posOS0, normalWS, float2(uvOffset, 0.0));
-    AppendFinVertex(stream, uv12, posOS3, normalWS, float2(uvOffset + uvXScale, 0.0));
+    AppendFinVertex(stream, uv0, posOS0, normalWS, float2(uvOffset, 0.0), input0);
+    AppendFinVertex(stream, uv12, posOS3, normalWS, float2(uvOffset + uvXScale, 0.0), input0);
 
     float3 posWS = TransformObjectToWorld(posOS0);
     float finStep = _FinLength / _FinJointNum;
@@ -82,8 +105,8 @@ void AppendFinVertices(
         float3 moveOS = TransformWorldToObjectDir(moveWS, false);
         posOS0 += moveOS;
         posOS3 += moveOS;
-        AppendFinVertex(stream, uv0, posOS0, normalWS, float2(uvOffset, finFactor));
-        AppendFinVertex(stream, uv12, posOS3, normalWS, float2(uvOffset + uvXScale, finFactor));
+        AppendFinVertex(stream, uv0, posOS0, normalWS, float2(uvOffset, finFactor), input0);
+        AppendFinVertex(stream, uv12, posOS3, normalWS, float2(uvOffset + uvXScale, finFactor), input0);
     }
     stream.RestartStrip();
 }
