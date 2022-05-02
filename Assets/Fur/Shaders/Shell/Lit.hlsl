@@ -157,6 +157,7 @@ void AppendShellVertexInstancing(inout TriangleStream<g2f> stream, v2g input, in
 // "200 / 13 = 15, remains 5"
 // 
 // You will need "16" instances, "15" for 195 shells, "1" for 5 remaining shells.
+// So, use [instance(15)] to execute "15+1" instances.
 // 
 // IMPORTANT: if you set [instance(30)] for 200 shells, you will waste performance because
 //            "stream.RestartStrip()" will run on 14 istances (with empty output).
