@@ -100,6 +100,23 @@ SubShader
 
     Pass
     {
+        Name "DepthNormals"
+        Tags { "LightMode" = "DepthNormals" }
+
+        ZWrite On
+
+        HLSLPROGRAM
+        #pragma exclude_renderers gles gles3 glcore
+        #pragma vertex vert
+        #pragma require geometry
+        #pragma geometry geom
+        #pragma fragment frag
+        #include "./DepthNormals.hlsl"
+        ENDHLSL
+    }
+
+    Pass
+    {
         Name "ShadowCaster"
         Tags { "LightMode" = "ShadowCaster" }
 
