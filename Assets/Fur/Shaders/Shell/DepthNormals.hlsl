@@ -70,7 +70,7 @@ void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
     }
 }
 
-float4 frag(g2f input) : SV_Target
+float4 frag(Varyings input) : SV_Target
 {
     float2 furUV = input.uv / _BaseMap_ST.xy * _FurScale;
 
