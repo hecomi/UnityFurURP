@@ -31,10 +31,10 @@ Properties
 
 SubShader
 {
-    Tags 
-    { 
-        "RenderType" = "Opaque" 
-        "RenderPipeline" = "UniversalPipeline" 
+    Tags
+    {
+        "RenderType" = "Opaque"
+        "RenderPipeline" = "UniversalPipeline"
         "UniversalMaterialType" = "Lit"
         "IgnoreProjector" = "True"
     }
@@ -50,15 +50,21 @@ SubShader
         Tags { "LightMode" = "UniversalForward" }
 
         HLSLPROGRAM
-        // URP ÇÃÉLÅ[ÉèÅ[Éh
+        // URP „ÅÆ„Ç≠„Éº„ÉØ„Éº„Éâ
+#if (UNITY_VERSION >= 202111)
+        #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+        #pragma multi_compile_fragment _ _LIGHT_LAYERS
+#else
         #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
         #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
+#endif
         #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
         #pragma multi_compile _ _ADDITIONAL_LIGHT_SHADOWS
         #pragma multi_compile _ _SHADOWS_SOFT
         #pragma multi_compile _ _MIXED_LIGHTING_SUBTRACTIVE
+        #pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
 
-        // Unity ÇÃÉLÅ[ÉèÅ[Éh
+        // Unity „ÅÆ„Ç≠„Éº„ÉØ„Éº„Éâ
         #pragma multi_compile _ DIRLIGHTMAP_COMBINED
         #pragma multi_compile _ LIGHTMAP_ON
         #pragma multi_compile_fog
@@ -68,7 +74,7 @@ SubShader
         #pragma target 2.0
         #pragma vertex vert
         #pragma require geometry
-        #pragma geometry geom 
+        #pragma geometry geom
         #pragma fragment frag
         #include "./Lit.hlsl"
         ENDHLSL
@@ -86,7 +92,7 @@ SubShader
         #pragma exclude_renderers gles gles3 glcore
         #pragma vertex vert
         #pragma require geometry
-        #pragma geometry geom 
+        #pragma geometry geom
         #pragma fragment frag
         #include "./Depth.hlsl"
         ENDHLSL
@@ -105,7 +111,7 @@ SubShader
         #pragma exclude_renderers gles gles3 glcore
         #pragma vertex vert
         #pragma require geometry
-        #pragma geometry geom 
+        #pragma geometry geom
         #pragma fragment frag
         #include "./Shadow.hlsl"
         ENDHLSL

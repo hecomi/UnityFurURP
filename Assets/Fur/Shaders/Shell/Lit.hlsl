@@ -108,7 +108,7 @@ float4 frag(Varyings input) : SV_Target
     inputData.positionWS = input.positionWS;
     inputData.normalWS = normalWS;
     inputData.viewDirectionWS = viewDirWS;
-#if defined(_MAIN_LIGHT_SHADOWS) && !defined(_RECEIVE_SHADOWS_OFF)
+#if (defined(_MAIN_LIGHT_SHADOWS) || defined(_MAIN_LIGHT_SHADOWS_CASCADE) || defined(_MAIN_LIGHT_SHADOWS_SCREEN)) && !defined(_RECEIVE_SHADOWS_OFF)
     inputData.shadowCoord = TransformWorldToShadowCoord(input.positionWS);
 #else
     inputData.shadowCoord = float4(0, 0, 0, 0);
