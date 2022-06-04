@@ -116,6 +116,7 @@ float4 frag(Varyings input) : SV_Target
     inputData.fogCoord = input.fogFactorAndVertexLight.x;
     inputData.vertexLighting = input.fogFactorAndVertexLight.yzw;
     inputData.bakedGI = SAMPLE_GI(input.lightmapUV, input.vertexSH, normalWS);
+    inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(input.positionCS);
 
     float4 color = UniversalFragmentPBR(inputData, surfaceData);
 
