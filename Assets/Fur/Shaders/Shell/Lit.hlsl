@@ -21,7 +21,7 @@ struct Varyings
     float4 positionCS : SV_POSITION;
     float3 positionWS : TEXCOORD0;
     float3 normalWS : TEXCOORD1;
-    float3 tangentWS : TEXCOORD2;
+    float4 tangentWS : TANGENT;
     float2 uv : TEXCOORD4;
     DECLARE_LIGHTMAP_OR_SH(lightmapUV, vertexSH, 5);
     float4 fogFactorAndVertexLight : TEXCOORD6; // x: fogFactor, yzw: vertex light
@@ -52,7 +52,7 @@ void AppendShellVertex(inout TriangleStream<Varyings> stream, Attributes input, 
     output.positionCS = TransformWorldToHClip(output.positionWS);
     output.uv = TRANSFORM_TEX(input.texcoord, _BaseMap);
     output.normalWS = normalInput.normalWS;
-    output.tangentWS = normalInput.tangentWS;
+    output.tangentWS = float4(normalInput.tangentWS, input.tangentOS.w);
     output.layer = (float)index / _ShellAmount;
 
     float3 vertexLight = VertexLighting(vertexInput.positionWS, normalInput.normalWS);
@@ -94,10 +94,10 @@ float4 frag(Varyings input) : SV_Target
     float3 normalTS = UnpackNormalScale(
         SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, furUv), 
         _NormalScale);
-    float3 bitangent = SafeNormalize(viewDirWS.y * cross(input.normalWS, input.tangentWS));
+    float3 bitangent = SafeNormalize(input.tangentWS.w * cross(input.normalWS, input.tangentWS));
     float3 normalWS = SafeNormalize(TransformTangentToWorld(
         normalTS, 
-        float3x3(input.tangentWS, bitangent, input.normalWS)));
+        float3x3(input.tangentWS.xyz, bitangent, input.normalWS)));
 
     SurfaceData surfaceData = (SurfaceData)0;
     InitializeStandardLitSurfaceData(input.uv, surfaceData);
