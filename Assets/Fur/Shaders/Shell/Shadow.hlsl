@@ -66,16 +66,13 @@ void geom(triangle Attributes input[3], inout TriangleStream<Varyings> stream)
     }
 }
 
-void frag(
-    Varyings input, 
-    out float4 outColor : SV_Target, 
-    out float outDepth : SV_Depth)
+half4 frag(Varyings input) : SV_Target
 {
     float4 furColor = SAMPLE_TEXTURE2D(_FurMap, sampler_FurMap, input.uv * _FurScale);
     float alpha = furColor.r * (1.0 - input.layer);
     if (input.layer > 0.0 && alpha < _AlphaCutout) discard;
 
-    outColor = outDepth = input.vertex.z / input.vertex.w;
+    return 0;
 }
 
 #endif
